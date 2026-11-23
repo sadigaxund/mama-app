@@ -4,7 +4,11 @@ import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.ContactsContract;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.text.Editable;
@@ -43,6 +47,7 @@ import com.mama.app.model.ReminderMode;
 import com.mama.app.model.Stage;
 import com.mama.app.ui.BaseActivity;
 import com.mama.app.ui.Format;
+import com.mama.app.ui.Intents;
 import com.mama.app.ui.Prefs;
 
 import java.time.LocalDate;
@@ -186,8 +191,7 @@ public class OrderFormActivity extends BaseActivity {
 
         findViewById(R.id.btn_close).setOnClickListener(v -> onBackPressed());
         findViewById(R.id.btn_save).setOnClickListener(v -> save());
-        findViewById(R.id.btn_contacts).setOnClickListener(v ->
-                Toast.makeText(this, R.string.coming_soon, Toast.LENGTH_SHORT).show());
+        findViewById(R.id.btn_contacts).setOnClickListener(v -> pickContact());
         kindTailoring.setOnClickListener(v -> setKind(Kind.TAILORING));
         kindRepair.setOnClickListener(v -> setKind(Kind.REPAIR));
         fDeadline.setOnClickListener(v -> showDatePicker());
@@ -757,6 +761,49 @@ public class OrderFormActivity extends BaseActivity {
             // Validation passed above, so this is a database failure. Tell the user, keep the form.
             Log.e(TAG, "order save failed", e);
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    // ---- contacts picker ----
+
+    private static final int REQUEST_CONTACT = 1;
+
+    private void pickContact() {
+        try {
+            startActivityForResult(Intents.pickPhoneContact(), REQUEST_CONTACT);
+        } catch (ActivityNotFoundException e) {
+            Log.w(TAG, "form: no contacts app");
+            Toast.makeText(this, R.string.no_contacts_app, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode != REQUEST_CONTACT || resultCode != RESULT_OK || data == null
+                || data.getData() == null) {
+            return;
+        }
+        Uri uri = data.getData();
+        String[] cols = {ContactsContract.CommonDataKinds.Phone.NUMBER,
+                ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME};
+        try (Cursor c = getContentResolver().query(uri, cols, null, null, null)) {
+            if (c == null || !c.moveToFirst()) {
+                Log.w(TAG, "form: picked contact returned no row");
+                return;
+            }
+            String number = c.getString(0);
+            String name = c.getString(1);
+            if (number != null) {
+                fPhone.setText(number.trim());
+            }
+            if (name != null && fCustomer.getText().toString().trim().isEmpty()) {
+                fCustomer.setText(name);
+            }
+        } catch (SecurityException | IllegalArgumentException e) {
+            // Safe: a failed read leaves the form as it was; the user can type the number.
+            Log.w(TAG, "form: contact read failed", e);
+            Toast.makeText(this, R.string.no_contacts_app, Toast.LENGTH_LONG).show();
         }
     }
 }

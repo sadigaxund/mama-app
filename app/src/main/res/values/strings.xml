@@ -104,4 +104,6 @@
     <string name="share">Share</string>
     <string name="ledger_expense_amount">+ %1$s</string>
     <string name="ledger_payment_amount">− %1$s</string>
+    <string name="no_contacts_app">No contacts app found</string>
+    <string name="no_dialer_app">No phone app found</string>
 </resources>

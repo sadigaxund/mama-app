@@ -2,6 +2,7 @@ package com.mama.app;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
@@ -36,6 +37,7 @@ import com.mama.app.model.OrderPhoto;
 import com.mama.app.model.Stage;
 import com.mama.app.ui.BaseActivity;
 import com.mama.app.ui.Format;
+import com.mama.app.ui.Intents;
 import com.mama.app.ui.OrderCardAdapter;
 
 import java.io.File;
@@ -79,7 +81,7 @@ public class OrderDetailActivity extends BaseActivity {
         findViewById(R.id.btn_edit).setOnClickListener(v ->
                 startActivity(OrderFormActivity.editIntent(this, orderId)));
         findViewById(R.id.btn_delete).setOnClickListener(v -> confirmDeleteOrder());
-        findViewById(R.id.btn_call).setOnClickListener(v -> soon());
+        findViewById(R.id.btn_call).setOnClickListener(v -> dial());
         findViewById(R.id.btn_add_photo).setOnClickListener(v -> soon());
         findViewById(R.id.btn_add_visit).setOnClickListener(v -> soon());
         findViewById(R.id.btn_share).setOnClickListener(v -> soon());
@@ -101,6 +103,16 @@ public class OrderDetailActivity extends BaseActivity {
         }
         db.close();
         super.onDestroy();
+    }
+
+    private void dial() {
+        CharSequence phone = ((TextView) findViewById(R.id.phone)).getText();
+        try {
+            startActivity(Intents.dial(phone.toString()));
+        } catch (ActivityNotFoundException e) {
+            Log.w(TAG, "detail: no dialer");
+            Toast.makeText(this, R.string.no_dialer_app, Toast.LENGTH_LONG).show();
+        }
     }
 
     private void soon() {

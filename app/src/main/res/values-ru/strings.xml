@@ -106,4 +106,6 @@
     <string name="share">Поделиться</string>
     <string name="ledger_expense_amount">+ %1$s</string>
     <string name="ledger_payment_amount">− %1$s</string>
+    <string name="no_contacts_app">Приложение контактов не найдено</string>
+    <string name="no_dialer_app">Приложение телефона не найдено</string>
 </resources>

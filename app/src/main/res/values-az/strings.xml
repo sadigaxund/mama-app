@@ -104,4 +104,6 @@
     <string name="share">Paylaş</string>
     <string name="ledger_expense_amount">+ %1$s</string>
     <string name="ledger_payment_amount">− %1$s</string>
+    <string name="no_contacts_app">Kontaktlar tətbiqi tapılmadı</string>
+    <string name="no_dialer_app">Telefon tətbiqi tapılmadı</string>
 </resources>

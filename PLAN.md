@@ -16,7 +16,7 @@ step lands as one commit and is checked on a device before it is ticked.
 4. [x] Order form: create and edit, garment type picker with "+ New type"
 5. [x] Moving orders: arrow button and long-press menu
 6. [x] Order detail with ledger: add payment, add expense, balance
-7. [ ] Phone: contacts picker and call button
+7. [x] Phone: contacts picker and call button
 8. [ ] Search, filter, sort
 9. [ ] Settings: language (RU default, AZ, EN) and currency (AZN default)
 10. [ ] Photos: camera and gallery, card thumbnail, full-screen view
@@ -24,7 +24,9 @@ step lands as one commit and is checked on a device before it is ticked.
 12. [ ] Reminders: morning notification group, actions, appointment alarms, reboot
 13. [ ] Share: text, image and PDF
 14. [ ] Backup: Google Cloud setup, sign-in, daily Drive folder sync, restore
-15. [ ] Check every step on the physical phone
+15. [ ] Check every step on the physical phone. Items Waydroid could not prove:
+    - Picking a contact fills the phone, and the name only when empty.
+    - The call button opens the dialer with the number.
 
 ## Possible features
 
