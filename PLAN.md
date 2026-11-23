@@ -25,9 +25,9 @@ step lands as one commit and is checked on a device before it is ticked.
 13. [x] Share: text, image and PDF
 14. [x] Backup: sign-in, daily Drive folder sync, restore (code done; works once
     the maintainer finishes `docs/backup-setup.md`)
-15. [ ] Check every step on the physical phone. Items Waydroid could not prove:
+15. [ ] Check every step on the physical phone (Android 17, font scale 1.45).
+    The call button opens the dialer with the number. Still open:
     - Picking a contact fills the phone, and the name only when empty.
-    - The call button opens the dialer with the number.
     - Taking a photo with the camera adds it to the order, upright.
     - The morning notification arrives at its set time, and after a reboot.
     - A visit reminder pops up with sound, and its call button opens the dialer.
