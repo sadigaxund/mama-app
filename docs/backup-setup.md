@@ -24,9 +24,9 @@ The sign-in flow is `AuthorizationClient` from `play-services-auth` with the sco
 10. Press Create. The client can take a few minutes to take effect.
 11. Install the app and open Settings, then Backup, then "Войти через Google". Pick the Google account and grant access to Drive.
 
-## Release key
+## Signing key
 
-A build signed with another key has another SHA-1. Create a second Android OAuth client in the same project with the same package name and the release key's SHA-1. Both clients work side by side.
+The app is installed as the debug build, signed with the debug keystore. Keep a copy of that keystore outside the machine. A build signed with any other key cannot update the installed app without an uninstall, and its SHA-1 needs its own Android OAuth client in the same project.
 
 ## Check
 

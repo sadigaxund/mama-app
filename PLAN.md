@@ -61,15 +61,11 @@ it, and the question goes below.
 
 ## Questions for the maintainer
 
-1. JUnit 4 was added for tests only, under the orchestrator's judgment while
-   the maintainer was away. It never ships in the app. Keep it?
-2. Stepping back from Done returns to Fitting 2, whichever stage the order
-   came from. Good enough, or should the app remember the exact stage?
-3. The new-type picker seeds seven Russian garment types on first launch:
-   Костюм, Платье, Брюки, Юбка, Пиджак, Рубашка, Пальто. Change the list?
-4. There is no `README.md`, which `AGENTS.md` says the maintainer owns.
-   `docs/architecture.md` is not linked from anywhere until one exists. May
-   the orchestrator write a short one?
-5. Google Cloud setup for backup: follow `docs/backup-setup.md` (about 15
-   minutes). The debug key fingerprint is listed in the orchestrator's
-   final message.
+None open. Answered:
+
+- JUnit stays, and CI runs the JVM tests on every push.
+- Stepping back from Done returns to Fitting 2.
+- The seven seeded garment types stay.
+- `README.md` exists.
+- The repository keeps the name `mama-app`.
+- The app ships as the debug build to one phone. No release key and no second OAuth client.
