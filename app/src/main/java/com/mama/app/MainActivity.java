@@ -1,12 +1,10 @@
 package com.mama.app;
 
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -43,10 +41,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/** The board: one tab per stage and the selected stage's orders. Read-only in this step. */
+/** The board: one tab per stage and the selected stage's orders. */
 public class MainActivity extends BaseActivity {
     private static final String TAG = "MamaApp";
     private static final String STATE_STAGE = "stage";
+    private static final int REQUEST_FORM = 1;
     private static final String EXTRA_SEED_DEMO = "seed_demo";
 
     private DbHelper db;
@@ -96,7 +95,8 @@ public class MainActivity extends BaseActivity {
         list.setAdapter(adapter);
 
         buildTabs();
-        findViewById(R.id.fab).setOnClickListener(v -> comingSoon());
+        findViewById(R.id.fab).setOnClickListener(v ->
+                startActivityForResult(OrderFormActivity.newOrderIntent(this, stages[selected]), REQUEST_FORM));
 
         final int minDistance = getResources().getDimensionPixelSize(R.dimen.swipe_min_distance);
         swipeDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
@@ -121,6 +121,20 @@ public class MainActivity extends BaseActivity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(STATE_STAGE, selected);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_FORM && resultCode == RESULT_OK && data != null) {
+            String name = data.getStringExtra(OrderFormActivity.EXTRA_STAGE);
+            for (int i = 0; i < stages.length; i++) {
+                if (stages[i].name().equals(name)) {
+                    // onResume runs next and refreshes the board on this tab.
+                    selected = i;
+                }
+            }
+        }
     }
 
     @Override
@@ -172,7 +186,7 @@ public class MainActivity extends BaseActivity {
         refresh();
     }
 
-    private static int stageLabel(Stage s) {
+    static int stageLabel(Stage s) {
         switch (s) {
             case ACCEPTED: return R.string.stage_accepted;
             case CUTTING: return R.string.stage_cutting;
@@ -190,14 +204,13 @@ public class MainActivity extends BaseActivity {
             View tab = tabViews.get(i);
             boolean on = i == selected;
             TextView text = tab.findViewById(R.id.tab_text);
-            String count = Integer.toString(counts.get(stages[i]));
-            String label = getString(R.string.tab_label, getString(stageLabel(stages[i])), counts.get(stages[i]));
-            SpannableString styled = new SpannableString(label);
-            int countStart = label.length() - count.length();
-            // The count is muted so "Примерка 1 2" reads as stage "Примерка 1" with 2 orders.
-            styled.setSpan(new ForegroundColorSpan(getColor(R.color.text_muted)), countStart,
-                    label.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            text.setText(styled);
+            int count = counts.get(stages[i]);
+            text.setText(stageLabel(stages[i]));
+            TextView badge = tab.findViewById(R.id.tab_badge);
+            badge.setText(Integer.toString(count));
+            badge.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
+            badge.getBackground().mutate().setTint(getColor(on ? R.color.accent : R.color.tab_badge_idle_bg));
+            badge.setTextColor(getColor(on ? R.color.on_accent : R.color.accent));
             text.setTypeface(null, on ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
             tab.findViewById(R.id.tab_underline).setVisibility(on ? View.VISIBLE : View.INVISIBLE);
             tab.setSelected(on);

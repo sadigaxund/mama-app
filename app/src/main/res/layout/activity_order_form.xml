@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/title_bar_height"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/btn_close"
+            android:layout_width="@dimen/form_touch"
+            android:layout_height="@dimen/form_touch"
+            android:layout_marginStart="4dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/form_close_desc"
+            android:src="@drawable/ic_close" />
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingStart="8dp"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/title_text_size"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/btn_save"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/form_touch"
+            android:layout_marginEnd="8dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:minWidth="@dimen/form_touch"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:text="@string/form_save"
+            android:textColor="@color/accent"
+            android:textSize="@dimen/body_text_size"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@drawable/tab_divider" />
+
+    <ScrollView
+        android:id="@+id/scroll"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:paddingBottom="@dimen/form_bottom_space">
+
+        <LinearLayout
+            android:id="@+id/form"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="@dimen/form_side"
+            android:paddingEnd="@dimen/form_side"
+            android:paddingTop="@dimen/form_gap">
+
+            <!-- 1 customer -->
+            <LinearLayout
+                android:id="@+id/block_customer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <TextView style="@style/FormLabel" android:text="@string/label_customer" />
+                <EditText
+                    android:id="@+id/f_customer"
+                    style="@style/FormField"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName|textCapWords"
+                    android:singleLine="true" />
+                <TextView android:id="@+id/e_customer" style="@style/FormError"
+                    android:text="@string/error_customer" />
+            </LinearLayout>
+
+            <!-- 2 phone -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/form_gap"
+                android:orientation="vertical">
+                <TextView style="@style/FormLabel" android:text="@string/label_phone" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+                    <EditText
+                        android:id="@+id/f_phone"
+                        style="@style/FormField"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:inputType="phone"
+                        android:singleLine="true" />
+                    <ImageButton
+                        android:id="@+id/btn_contacts"
+                        android:layout_width="@dimen/form_touch"
+                        android:layout_height="@dimen/form_touch"
+                        android:layout_marginStart="4dp"
+                        android:alpha="0.5"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/phone_contacts_desc"
+                        android:src="@drawable/ic_contacts" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- 3 kind -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/form_gap"
+                android:orientation="vertical">
+                <TextView style="@style/FormLabel" android:text="@string/label_kind" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:id="@+id/kind_tailoring"
+                        android:layout_width="0dp"
+                        android:layout_height="@dimen/form_touch"
+                        android:layout_weight="1"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center"
+                        android:text="@string/kind_tailoring"
+                        android:textSize="@dimen/form_text_size" />
+                    <View android:layout_width="8dp" android:layout_height="match_parent" />
+                    <TextView
+                        android:id="@+id/kind_repair"
+                        android:layout_width="0dp"
+                        android:layout_height="@dimen/form_touch"
+                        android:layout_weight="1"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center"
+                        android:text="@string/kind_repair"
+                        android:textSize="@dimen/form_text_size" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- 4 garment type -->
+            <LinearLayout
+                android:id="@+id/block_garment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/form_gap"
+                android:orientation="vertical">
+                <TextView style="@style/FormLabel" android:text="@string/label_garment" />
+                <Spinner
+                    android:id="@+id/f_garment"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/form_touch"
+                    android:background="@drawable/spinner_bg"
+                    android:saveEnabled="false"
+                    android:spinnerMode="dropdown" />
+                <TextView android:id="@+id/e_garment" style="@style/FormError"
+                    android:text="@string/error_garment" />
+            </LinearLayout>
+
+            <!-- 5 price -->
+            <LinearLayout
+                android:id="@+id/block_price"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/form_gap"
+                android:orientation="vertical">
+                <TextView style="@style/FormLabel" android:text="@string/label_price" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+                    <EditText
+                        android:id="@+id/f_price"
+                        style="@style/FormField"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="@string/hint_amount"
+                        android:inputType="numberDecimal"
+                        android:singleLine="true" />
+                    <TextView
+                        android:id="@+id/price_currency"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minWidth="@dimen/form_touch"
+                        android:gravity="center"
+                        android:textColor="@color/text_muted"
+                        android:textSize="20sp" />
+                </LinearLayout>
+                <TextView android:id="@+id/e_price" style="@style/FormError"
+                    android:text="@string/error_price" />
+            </LinearLayout>
+
+            <!-- 6 deadline -->
+            <LinearLayout
+                android:id="@+id/block_deadline"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/form_gap"
+                android:orientation="vertical">
+                <TextView style="@style/FormLabel" android:text="@string/label_deadline" />
+                <TextView
+                    android:id="@+id/f_deadline"
+                    style="@style/FormField"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true" />
+                <TextView android:id="@+id/e_deadline" style="@style/FormError"
+                    android:text="@string/error_deadline" />
+            </LinearLayout>
+
+            <!-- 7 deposit -->
+            <LinearLayout
+                android:id="@+id/block_deposit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/form_gap"
+                android:orientation="vertical">
+                <TextView style="@style/FormLabel" android:text="@string/label_deposit" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+                    <EditText
+                        android:id="@+id/f_deposit"
+                        style="@style/FormField"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="@string/hint_amount"
+                        android:inputType="numberDecimal"
+                        android:singleLine="true" />
+                    <TextView
+                        android:id="@+id/deposit_currency"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minWidth="@dimen/form_touch"
+                        android:gravity="center"
+                        android:textColor="@color/text_muted"
+                        android:textSize="20sp" />
+                </LinearLayout>
+                <TextView android:id="@+id/e_deposit" style="@style/FormError"
+                    android:text="@string/error_deposit" />
+            </LinearLayout>
+
+            <!-- 8 notes -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/form_gap"
+                android:orientation="vertical">
+                <TextView style="@style/FormLabel" android:text="@string/label_notes" />
+                <EditText
+                    android:id="@+id/f_notes"
+                    style="@style/FormField"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="top|start"
+                    android:inputType="textMultiLine|textCapSentences"
+                    android:minLines="3"
+                    android:paddingBottom="@dimen/form_field_padding"
+                    android:paddingTop="@dimen/form_field_padding" />
+            </LinearLayout>
+
+            <!-- 9 reminders -->
+            <TextView
+                android:id="@+id/f_reminders"
+                style="@style/FormField"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/form_gap"
+                android:clickable="true"
+                android:focusable="true" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

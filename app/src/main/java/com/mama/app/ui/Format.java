@@ -14,8 +14,6 @@ import java.util.Locale;
 
 /** Display formatting for money, dates and weekdays. */
 public final class Format {
-    public static final String KEY_CURRENCY = "currency";
-    public static final String DEFAULT_CURRENCY = "AZN";
     private static final String AZN_SYMBOL = "₼";
 
     private Format() {}
@@ -26,9 +24,9 @@ public final class Format {
 
     /** The currency symbol for the saved code. Android prints "AZN" for the manat, so it is forced. */
     public static String currencySymbol(Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(LocaleSupport.PREFS, Context.MODE_PRIVATE);
-        String code = prefs.getString(KEY_CURRENCY, DEFAULT_CURRENCY);
-        if (DEFAULT_CURRENCY.equals(code)) {
+        SharedPreferences prefs = Prefs.get(context);
+        String code = prefs.getString(Prefs.KEY_CURRENCY, Prefs.DEFAULT_CURRENCY);
+        if (Prefs.DEFAULT_CURRENCY.equals(code)) {
             return AZN_SYMBOL;
         }
         try {
@@ -48,6 +46,11 @@ public final class Format {
     public static String date(LocalDate date, LocalDate today) {
         String pattern = date.getYear() == today.getYear() ? "dd.MM" : "dd.MM.yyyy";
         return date.format(DateTimeFormatter.ofPattern(pattern));
+    }
+
+    /** "05.03.2026", the form field's date text. */
+    public static String dateFull(LocalDate date) {
+        return date.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
     }
 
     /** Short weekday with a capital first letter, such as "Чт". */

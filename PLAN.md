@@ -13,7 +13,7 @@ step lands as one commit and is checked on a device before it is ticked.
 1. [x] Repo setup: `.gitignore`, first commit, push
 2. [x] Database: all six tables, stage-move rules, balance math, JVM tests
 3. [x] Board: stage tabs, cards with kind colors, read-only
-4. [ ] Order form: create and edit, garment type picker with "+ New type"
+4. [x] Order form: create and edit, garment type picker with "+ New type"
 5. [ ] Moving orders: arrow button and long-press menu
 6. [ ] Order detail with ledger: add payment, add expense, balance
 7. [ ] Phone: contacts picker and call button
