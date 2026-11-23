@@ -24,6 +24,7 @@ command line with the Gradle wrapper. No Android Studio is required.
 | `compileSdk` / `targetSdk` | 35 | `app/build.gradle` |
 | `minSdk` | 26 | `app/build.gradle` |
 | `com.google.android.gms:play-services-auth` | latest stable at adoption | `app/build.gradle` |
+| `junit:junit` (JVM tests only) | 4.13.2 | `app/build.gradle` |
 
 - Language is Java. No Kotlin, no Jetpack Compose, no third-party library.
   Adding any requires explicit approval from the maintainer, and the
@@ -40,7 +41,9 @@ command line with the Gradle wrapper. No Android Studio is required.
 ### Commands (repo root)
 
 - `./gradlew assembleDebug`: build `app/build/outputs/apk/debug/app-debug.apk`
-- `./gradlew test`: unit tests on the JVM
+- `./gradlew testDebugUnitTest`: unit tests on the JVM
+- `./gradlew connectedDebugAndroidTest`: repository tests on a device, using
+  the framework `android.test` runner (no AndroidX)
 - `adb devices -l`: list attached devices
 - `adb install -r <apk>`: install or update the app
 - `adb shell am start -n com.mama.app/.MainActivity`: launch it

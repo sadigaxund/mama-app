@@ -12,5 +12,14 @@ android {
         targetSdk 35
         versionCode 1
         versionName "0.1"
+        testInstrumentationRunner "android.test.InstrumentationTestRunner"
     }
+
+    useLibrary 'android.test.runner'
+    useLibrary 'android.test.base'
+    useLibrary 'android.test.mock'
+}
+
+dependencies {
+    testImplementation 'junit:junit:4.13.2'
 }

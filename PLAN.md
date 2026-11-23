@@ -11,7 +11,7 @@ step lands as one commit and is checked on a device before it is ticked.
 ## Next
 
 1. [x] Repo setup: `.gitignore`, first commit, push
-2. [ ] Database: all six tables, stage-move rules, balance math, JVM tests
+2. [x] Database: all six tables, stage-move rules, balance math, JVM tests
 3. [ ] Board: stage tabs, cards with kind colors, read-only
 4. [ ] Order form: create and edit, garment type picker with "+ New type"
 5. [ ] Moving orders: arrow button and long-press menu
@@ -51,4 +51,12 @@ it, and the question goes below.
 
 ## Questions for the maintainer
 
-None yet.
+1. JUnit 4 was added for tests only, under the orchestrator's judgment while
+   the maintainer was away. It never ships in the app. Keep it?
+2. Stepping back from Done returns to Fitting 2, whichever stage the order
+   came from. Good enough, or should the app remember the exact stage?
+3. The new-type picker seeds seven Russian garment types on first launch:
+   Костюм, Платье, Брюки, Юбка, Пиджак, Рубашка, Пальто. Change the list?
+4. There is no `README.md`, which `AGENTS.md` says the maintainer owns.
+   `docs/architecture.md` is not linked from anywhere until one exists. May
+   the orchestrator write a short one?
