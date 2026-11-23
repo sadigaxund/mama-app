@@ -2,7 +2,7 @@
 
 Drive backup needs one OAuth client in Google Cloud. Do these steps once. The app code needs no key, client id or secret, and none belongs in the repository.
 
-The sign-in flow is `AuthorizationClient` from `play-services-auth` with the scope `https://www.googleapis.com/auth/drive.file`. Google identifies the app by its package name and signing-key SHA-1, so the OAuth client is of type Android. This flow needs no Web client and no client secret.
+The sign-in flow is `AuthorizationClient` from `play-services-auth` with the scopes `https://www.googleapis.com/auth/drive.file` and `email`. Google identifies the app by its package name and signing-key SHA-1, so the OAuth client is of type Android. This flow needs no Web client and no client secret.
 
 ## Steps
 
@@ -10,7 +10,7 @@ The sign-in flow is `AuthorizationClient` from `play-services-auth` with the sco
 2. Open APIs and Services, then Library. Search for "Google Drive API" and press Enable.
 3. Open APIs and Services, then OAuth consent screen. Choose the user type External.
 4. Fill in the app name, a support email, a developer contact email, a home page link and a privacy policy link. Save. Publish app in step 6 stays disabled until all five are set.
-5. On the Scopes step, add only `https://www.googleapis.com/auth/drive.file`. Google rates it non-sensitive, so no verification is needed.
+5. On the Scopes step, add `https://www.googleapis.com/auth/drive.file` and `.../auth/userinfo.email`. Google rates both non-sensitive, so no verification is needed.
 6. Under Publishing status, press Publish app so the status is "In production". A project left in "Testing" drops the grant after 7 days, and backup stops until the user signs in again.
 7. Open APIs and Services, then Credentials. Press Create credentials, then OAuth client ID, and choose the application type Android.
 8. Enter the package name `com.atelier.app`.

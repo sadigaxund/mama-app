@@ -210,8 +210,9 @@ button. Settings can sign in later, change the account, or sign out. Sign-in
 and the Drive token come from `AuthorizationClient` in `play-services-auth`,
 the one library outside the framework (`AGENTS.md` §1).
 
-The only scope is `drive.file`, which reaches files this app created and
-nothing else. Google rates it non-sensitive, so the app needs no Google
+The scopes are `drive.file` and `email`. `drive.file` reaches files this app
+created and nothing else. `email` gives the account address that Settings
+shows. Google rates both non-sensitive, so the app needs no Google
 verification. The OAuth consent screen must be set to production, because a
 testing-mode grant expires after 7 days.
 

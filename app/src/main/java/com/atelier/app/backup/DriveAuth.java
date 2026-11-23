@@ -20,7 +20,7 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.tasks.Tasks;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -33,6 +33,7 @@ import java.util.concurrent.TimeoutException;
 public final class DriveAuth {
     private static final String TAG = "Atelier";
     public static final String SCOPE = "https://www.googleapis.com/auth/drive.file";
+    private static final String EMAIL_SCOPE = "email";
     private static final long TOKEN_WAIT_SECONDS = 60;
 
     /** Why an interactive sign-in did not finish. */
@@ -47,8 +48,9 @@ public final class DriveAuth {
 
     private DriveAuth() {}
 
+    /** Drive file access, plus the account email so Settings can show which account backs up. */
     private static List<Scope> scopes() {
-        return Collections.singletonList(new Scope(SCOPE));
+        return Arrays.asList(new Scope(SCOPE), new Scope(EMAIL_SCOPE));
     }
 
     private static AuthorizationRequest request(Context context) {
