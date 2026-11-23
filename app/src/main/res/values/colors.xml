@@ -17,4 +17,6 @@
     <color name="field_stroke">#BDBDBD</color>
     <color name="text_hint">#9E9E9E</color>
     <color name="tab_badge_idle_bg">#EDE3F3</color>
+    <color name="undo_bar_bg">#323232</color>
+    <color name="undo_bar_text">#FFFFFF</color>
 </resources>

@@ -71,4 +71,8 @@
         <item quantity="many">%d дн.</item>
         <item quantity="other">%d дн.</item>
     </plurals>
+    <string name="move_forward">→ %1$s</string>
+    <string name="move_back">← %1$s</string>
+    <string name="undo_moved">#%1$d → %2$s</string>
+    <string name="undo_action">Отменить</string>
 </resources>

@@ -174,6 +174,22 @@ public class OrderRepository {
     }
 
     /**
+     * Puts the order back on a stage with its old stage_changed_at. For undoing a move only:
+     * it skips the move rules, because the move being undone may not be an allowed move back
+     * (FITTING_1 to DONE is undone to FITTING_1). Throws IllegalArgumentException for an
+     * unknown id.
+     */
+    public void restoreStage(long id, Stage stage, long stageChangedAt) {
+        ContentValues v = new ContentValues();
+        v.put("stage", stage.name());
+        v.put("stage_changed_at", stageChangedAt);
+        int n = helper.getWritableDatabase().update("orders", v, "id = ?", new String[]{Long.toString(id)});
+        if (n == 0) {
+            throw new IllegalArgumentException("No order with id " + id);
+        }
+    }
+
+    /**
      * Matches customer name or phone as a case-insensitive substring, or the order id exactly.
      * A leading "#" on the query is ignored for the id match. Blank query returns nothing.
      * Case folding runs in Java because SQLite LIKE folds ASCII only, not Cyrillic.

@@ -80,6 +80,46 @@
         </FrameLayout>
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/undo_bar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/undo_bar_height"
+        android:layout_gravity="bottom"
+        android:layout_margin="@dimen/undo_bar_margin"
+        android:background="@drawable/undo_bar_bg"
+        android:elevation="@dimen/fab_elevation"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/undo_action_padding"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/undo_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textColor="@color/undo_bar_text"
+            android:textSize="@dimen/undo_bar_text_size" />
+
+        <TextView
+            android:id="@+id/undo_action"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="?android:attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:paddingStart="@dimen/undo_action_padding"
+            android:paddingEnd="@dimen/undo_action_padding"
+            android:singleLine="true"
+            android:text="@string/undo_action"
+            android:textColor="@color/undo_bar_text"
+            android:textSize="@dimen/undo_bar_text_size"
+            android:textStyle="bold" />
+    </LinearLayout>
+
     <TextView
         android:id="@+id/fab"
         android:layout_width="@dimen/fab_size"

@@ -50,16 +50,24 @@ public class OrderCardAdapter extends BaseAdapter {
         void onArrow(Order order);
     }
 
+    /** Called when a card is long-pressed. */
+    public interface LongPressListener {
+        void onLongPress(Order order);
+    }
+
     private static final int PLACEHOLDER_ALPHA = 0x33;
 
     private final Context context;
     private final LayoutInflater inflater;
     private final ArrowListener arrowListener;
+    private final LongPressListener longPressListener;
     private List<Row> rows = new ArrayList<>();
     private LocalDate today = LocalDate.now();
 
-    public OrderCardAdapter(Context context, ArrowListener arrowListener) {
+    public OrderCardAdapter(Context context, ArrowListener arrowListener,
+                            LongPressListener longPressListener) {
         this.context = context;
+        this.longPressListener = longPressListener;
         this.inflater = LayoutInflater.from(context);
         this.arrowListener = arrowListener;
     }
@@ -120,6 +128,13 @@ public class OrderCardAdapter extends BaseAdapter {
             appt.setText(" ");
             appt.setVisibility(View.INVISIBLE);
         }
+
+        // On the card, not the list: isEnabled is false, so the list never reports item long
+        // presses. The arrow button is clickable and not long-clickable, so it keeps its touches.
+        v.findViewById(R.id.card).setOnLongClickListener(c -> {
+            longPressListener.onLongPress(o);
+            return true;
+        });
 
         ImageButton arrow = v.findViewById(R.id.arrow);
         if (o.stage.next() != null) {

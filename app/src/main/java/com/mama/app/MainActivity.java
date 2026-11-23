@@ -4,7 +4,10 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.app.AlertDialog;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -14,7 +17,6 @@ import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.mama.app.data.AppointmentRepository;
 import com.mama.app.data.DbHelper;
@@ -65,6 +67,15 @@ public class MainActivity extends BaseActivity {
     private boolean trackingSwipe;
     private int selected = 0;
 
+    private static final long UNDO_MILLIS = 4000;
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private final Runnable hideUndo = this::hideUndoBar;
+    private View undoBar;
+    private View fab;
+    private long undoOrderId;
+    private Stage undoStage;
+    private long undoChangedAt;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -91,11 +102,14 @@ public class MainActivity extends BaseActivity {
         tabScroll = findViewById(R.id.tab_scroll);
         list = findViewById(R.id.order_list);
         emptyText = findViewById(R.id.empty_text);
-        adapter = new OrderCardAdapter(this, order -> comingSoon());
+        adapter = new OrderCardAdapter(this, order -> moveForward(order), this::showMoveMenu);
         list.setAdapter(adapter);
 
         buildTabs();
-        findViewById(R.id.fab).setOnClickListener(v ->
+        fab = findViewById(R.id.fab);
+        undoBar = findViewById(R.id.undo_bar);
+        findViewById(R.id.undo_action).setOnClickListener(v -> undoMove());
+        fab.setOnClickListener(v ->
                 startActivityForResult(OrderFormActivity.newOrderIntent(this, stages[selected]), REQUEST_FORM));
 
         final int minDistance = getResources().getDimensionPixelSize(R.dimen.swipe_min_distance);
@@ -140,11 +154,12 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        refresh();
+        refresh(true);
     }
 
     @Override
     protected void onDestroy() {
+        handler.removeCallbacks(hideUndo);
         db.close();
         super.onDestroy();
     }
@@ -162,8 +177,79 @@ public class MainActivity extends BaseActivity {
         return super.dispatchTouchEvent(ev);
     }
 
-    private void comingSoon() {
-        Toast.makeText(this, R.string.coming_soon, Toast.LENGTH_SHORT).show();
+    private void moveForward(Order order) {
+        Stage next = order.stage.next();
+        if (next != null) {
+            move(order, next);
+        }
+    }
+
+    /** Long-press menu: forward moves first, the back move last (Stage.allowedMoves order). */
+    private void showMoveMenu(Order order) {
+        final List<Stage> moves = order.stage.allowedMoves();
+        if (moves.isEmpty()) {
+            return;
+        }
+        final Stage back = order.stage.previous();
+        String[] labels = new String[moves.size()];
+        for (int i = 0; i < labels.length; i++) {
+            Stage s = moves.get(i);
+            labels[i] = getString(s == back ? R.string.move_back : R.string.move_forward,
+                    getString(stageLabel(s)));
+        }
+        new AlertDialog.Builder(this)
+                .setTitle(order.customerName)
+                .setItems(labels, (d, which) -> move(order, moves.get(which)))
+                .show();
+    }
+
+    private void move(Order order, Stage target) {
+        try {
+            orders.moveTo(order.id, target, System.currentTimeMillis());
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            // The card was stale (moved or deleted elsewhere). Reload and show nothing to undo.
+            Log.w(TAG, "move failed for #" + order.id + ": " + e.getMessage());
+            refresh(false);
+            return;
+        }
+        Log.d(TAG, "moved #" + order.id + " " + order.stage + " -> " + target);
+        undoOrderId = order.id;
+        undoStage = order.stage;
+        undoChangedAt = order.stageChangedAt;
+        showUndoBar(getString(R.string.undo_moved, order.id, getString(stageLabel(target))));
+        refresh(false);
+    }
+
+    private void undoMove() {
+        handler.removeCallbacks(hideUndo);
+        if (undoStage != null) {
+            try {
+                orders.restoreStage(undoOrderId, undoStage, undoChangedAt);
+                Log.d(TAG, "undo #" + undoOrderId + " -> " + undoStage);
+            } catch (IllegalArgumentException e) {
+                Log.w(TAG, "undo failed: " + e.getMessage());
+            }
+            undoStage = null;
+        }
+        hideUndoBar();
+        refresh(false);
+    }
+
+    private void showUndoBar(String text) {
+        ((TextView) findViewById(R.id.undo_text)).setText(text);
+        undoBar.setVisibility(View.VISIBLE);
+        // Lift the FAB clear of the bar: bar height plus its margin twice.
+        float margin = getResources().getDimension(R.dimen.undo_bar_margin);
+        fab.setTranslationY(-(getResources().getDimension(R.dimen.undo_bar_height) + margin));
+        handler.removeCallbacks(hideUndo);
+        handler.postDelayed(hideUndo, UNDO_MILLIS);
+    }
+
+    private void hideUndoBar() {
+        handler.removeCallbacks(hideUndo);
+        undoBar.setVisibility(View.GONE);
+        fab.setTranslationY(0);
+        undoStage = null;
     }
 
     private void buildTabs() {
@@ -183,7 +269,7 @@ public class MainActivity extends BaseActivity {
             return;
         }
         selected = index;
-        refresh();
+        refresh(true);
     }
 
     static int stageLabel(Stage s) {
@@ -198,7 +284,7 @@ public class MainActivity extends BaseActivity {
     }
 
     /** Reloads counts and the selected stage's cards. */
-    private void refresh() {
+    private void refresh(boolean resetScroll) {
         Map<Stage, Integer> counts = orders.countsByStage();
         for (int i = 0; i < stages.length; i++) {
             View tab = tabViews.get(i);
@@ -223,7 +309,9 @@ public class MainActivity extends BaseActivity {
 
         List<OrderCardAdapter.Row> rows = loadRows(stages[selected]);
         adapter.setRows(rows, LocalDate.now());
-        list.setSelection(0);
+        if (resetScroll) {
+            list.setSelection(0);
+        }
         emptyText.setVisibility(rows.isEmpty() ? View.VISIBLE : View.GONE);
         list.setVisibility(rows.isEmpty() ? View.GONE : View.VISIBLE);
     }

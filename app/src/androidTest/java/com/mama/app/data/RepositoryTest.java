@@ -192,6 +192,23 @@ public class RepositoryTest extends AndroidTestCase {
         assertEquals(Stage.FITTING_2, orders.get(id).stage);
     }
 
+    public void testRestoreStageIgnoresMoveRules() {
+        long id = add("R", Stage.FITTING_1, 5, 100);
+        orders.moveTo(id, Stage.DONE, 400);
+        assertEquals(Stage.DONE, orders.get(id).stage);
+        orders.restoreStage(id, Stage.FITTING_1, 100);
+        Order o = orders.get(id);
+        assertEquals(Stage.FITTING_1, o.stage);
+        assertEquals(100L, o.stageChangedAt);
+        assertEquals(100L, o.createdAt);
+        try {
+            orders.restoreStage(id + 999, Stage.CUTTING, 1);
+            fail("unknown id accepted");
+        } catch (IllegalArgumentException expected) {
+            // expected
+        }
+    }
+
     public void testListByStageSorting() {
         long late = add("late", Stage.ACCEPTED, 30, 1);
         long soonB = add("soonB", Stage.ACCEPTED, 10, 2);
