@@ -44,6 +44,7 @@ import com.mama.app.model.Money;
 import com.mama.app.model.Order;
 import com.mama.app.model.ReminderDays;
 import com.mama.app.model.ReminderMode;
+import com.mama.app.ui.ReminderDaysEditor;
 import com.mama.app.model.Stage;
 import com.mama.app.ui.BaseActivity;
 import com.mama.app.ui.Format;
@@ -495,8 +496,6 @@ public class OrderFormActivity extends BaseActivity {
 
     private void showRemindersDialog() {
         final ReminderMode[] mode = {remMode};
-        final List<Integer> days = new ArrayList<>(remDays);
-
         LinearLayout box = new LinearLayout(this);
         box.setOrientation(LinearLayout.VERTICAL);
         int pad = dp(24);
@@ -520,57 +519,8 @@ public class OrderFormActivity extends BaseActivity {
         }
         box.addView(group);
 
-        final LinearLayout customBox = new LinearLayout(this);
-        customBox.setOrientation(LinearLayout.VERTICAL);
-        final LinearLayout list = new LinearLayout(this);
-        list.setOrientation(LinearLayout.VERTICAL);
-        customBox.addView(list);
-
-        LinearLayout addRow = new LinearLayout(this);
-        addRow.setOrientation(LinearLayout.HORIZONTAL);
-        addRow.setGravity(Gravity.CENTER_VERTICAL);
-        final EditText dayInput = new EditText(this);
-        dayInput.setInputType(InputType.TYPE_CLASS_NUMBER);
-        dayInput.setSingleLine(true);
-        dayInput.setHint(R.string.reminders_days_hint);
-        addRow.addView(dayInput, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        Button add = new Button(this, null, android.R.attr.borderlessButtonStyle);
-        add.setText(R.string.action_add);
-        add.setTextColor(getColor(R.color.accent));
-        addRow.addView(add);
-        customBox.addView(addRow);
-        final TextView error = new TextView(this, null, 0, R.style.FormError);
-        customBox.addView(error);
+        final ReminderDaysEditor customBox = new ReminderDaysEditor(this, remDays);
         box.addView(customBox);
-
-        final Runnable rebuild = new Runnable() {
-            @Override
-            public void run() {
-                list.removeAllViews();
-                for (final Integer d : days) {
-                    LinearLayout row = new LinearLayout(OrderFormActivity.this);
-                    row.setGravity(Gravity.CENTER_VERTICAL);
-                    TextView t = new TextView(OrderFormActivity.this);
-                    t.setText(getResources().getQuantityString(R.plurals.reminder_days, d, d));
-                    t.setTextColor(getColor(R.color.text_primary));
-                    t.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX,
-                            getResources().getDimension(R.dimen.form_text_size));
-                    row.addView(t, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-                    ImageButton rm = new ImageButton(OrderFormActivity.this);
-                    rm.setImageResource(R.drawable.ic_remove);
-                    rm.setBackgroundResource(R.drawable.icon_button_ripple);
-                    rm.setContentDescription(getString(R.string.reminders_remove_desc));
-                    rm.setOnClickListener(v -> {
-                        days.remove(d);
-                        error.setVisibility(View.GONE);
-                        this.run();
-                    });
-                    row.addView(rm, new LinearLayout.LayoutParams(dp(48), dp(48)));
-                    list.addView(row);
-                }
-            }
-        };
-        rebuild.run();
 
         final Runnable showMode = () -> customBox.setVisibility(mode[0] == ReminderMode.CUSTOM
                 ? View.VISIBLE : View.GONE);
@@ -580,32 +530,9 @@ public class OrderFormActivity extends BaseActivity {
         group.setOnCheckedChangeListener((g, checked) -> {
             mode[0] = checked == optCustom.getId() ? ReminderMode.CUSTOM
                     : checked == optOff.getId() ? ReminderMode.OFF : ReminderMode.DEFAULT;
-            error.setVisibility(View.GONE);
+            customBox.clearError();
             showMode.run();
         });
-
-        // Tries to add the number in the field. Returns false and shows the reason when invalid.
-        final java.util.function.BooleanSupplier tryAdd = () -> {
-            String text = dayInput.getText().toString().trim();
-            if (text.isEmpty()) {
-                return true;
-            }
-            List<Integer> parsed = ReminderDays.parse(text);
-            if (parsed.size() != 1) {
-                error.setText(R.string.reminders_error_range);
-                error.setVisibility(View.VISIBLE);
-                return false;
-            }
-            if (!days.contains(parsed.get(0))) {
-                days.add(parsed.get(0));
-                days.sort(java.util.Collections.reverseOrder());
-            }
-            dayInput.setText("");
-            error.setVisibility(View.GONE);
-            rebuild.run();
-            return true;
-        };
-        add.setOnClickListener(v -> tryAdd.getAsBoolean());
 
         ScrollView dialogScroll = new ScrollView(this);
         dialogScroll.addView(box);
@@ -617,12 +544,12 @@ public class OrderFormActivity extends BaseActivity {
                 .create();
         showDialog(dialog);
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-            if (mode[0] == ReminderMode.CUSTOM && !tryAdd.getAsBoolean()) {
+            if (mode[0] == ReminderMode.CUSTOM && !customBox.commitInput()) {
                 return;
             }
+            List<Integer> days = customBox.days();
             if (mode[0] == ReminderMode.CUSTOM && days.isEmpty()) {
-                error.setText(R.string.reminders_error_none);
-                error.setVisibility(View.VISIBLE);
+                customBox.showError(R.string.reminders_error_none);
                 return;
             }
             remMode = mode[0];

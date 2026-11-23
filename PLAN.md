@@ -18,7 +18,7 @@ step lands as one commit and is checked on a device before it is ticked.
 6. [x] Order detail with ledger: add payment, add expense, balance
 7. [x] Phone: contacts picker and call button
 8. [x] Search, filter, sort
-9. [ ] Settings: language (RU default, AZ, EN) and currency (AZN default)
+9. [x] Settings: language (RU default, AZ, EN) and currency (AZN default)
 10. [ ] Photos: camera and gallery, card thumbnail, full-screen view
 11. [ ] Appointments: add, edit, delete, banner on fitting and done moves
 12. [ ] Reminders: morning notification group, actions, appointment alarms, reboot

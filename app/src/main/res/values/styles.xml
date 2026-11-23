@@ -64,4 +64,47 @@
         <item name="android:textAllCaps">false</item>
         <item name="android:textStyle">bold</item>
     </style>
+
+    <style name="SettingsHeader">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingStart">@dimen/form_side</item>
+        <item name="android:paddingEnd">@dimen/form_side</item>
+        <item name="android:paddingTop">@dimen/detail_section_gap</item>
+        <item name="android:paddingBottom">4dp</item>
+        <item name="android:textColor">@color/accent</item>
+        <item name="android:textSize">@dimen/settings_header_size</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.08</item>
+    </style>
+
+    <style name="SettingsRow">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">@dimen/settings_row_height</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingStart">@dimen/form_side</item>
+        <item name="android:paddingEnd">@dimen/form_side</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <style name="SettingsRowTitle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">@dimen/form_text_size</item>
+    </style>
+
+    <style name="SettingsRowSub">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/text_muted</item>
+        <item name="android:textSize">@dimen/body_text_size</item>
+    </style>
 </resources>

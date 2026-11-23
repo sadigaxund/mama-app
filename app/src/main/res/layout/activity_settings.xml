@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/title_bar_height"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/btn_back"
+            android:layout_width="@dimen/form_touch"
+            android:layout_height="@dimen/form_touch"
+            android:layout_marginStart="4dp"
+            android:background="@drawable/icon_button_ripple"
+            android:contentDescription="@string/detail_back_desc"
+            android:src="@drawable/ic_back" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:paddingStart="8dp"
+            android:singleLine="true"
+            android:text="@string/settings_title"
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/title_text_size"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:overScrollMode="never">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+        <TextView
+            style="@style/SettingsHeader"
+            android:text="@string/section_general" />
+
+        <LinearLayout
+            android:id="@+id/row_lang"
+            style="@style/SettingsRow">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/row_lang_title"
+                    style="@style/SettingsRowTitle" />
+
+                <TextView
+                    android:id="@+id/row_lang_sub"
+                    style="@style/SettingsRowSub" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/row_cur"
+            style="@style/SettingsRow">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/row_cur_title"
+                    style="@style/SettingsRowTitle" />
+
+                <TextView
+                    android:id="@+id/row_cur_sub"
+                    style="@style/SettingsRowSub" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/form_side"
+            android:paddingEnd="@dimen/form_side"
+            android:paddingBottom="4dp"
+            android:text="@string/currency_note"
+            android:textColor="@color/text_muted"
+            android:textSize="@dimen/settings_note_size" />
+
+        <TextView
+            style="@style/SettingsHeader"
+            android:text="@string/section_reminders" />
+
+        <LinearLayout
+            android:id="@+id/row_morning"
+            style="@style/SettingsRow">
+
+            <TextView
+                style="@style/SettingsRowTitle"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:text="@string/morning_switch" />
+
+            <Switch
+                android:id="@+id/switch_morning"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="false"
+                android:focusable="false" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/row_time"
+            style="@style/SettingsRow">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/row_time_title"
+                    style="@style/SettingsRowTitle" />
+
+                <TextView
+                    android:id="@+id/row_time_sub"
+                    style="@style/SettingsRowSub" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/row_days"
+            style="@style/SettingsRow">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/row_days_title"
+                    style="@style/SettingsRowTitle" />
+
+                <TextView
+                    android:id="@+id/row_days_sub"
+                    style="@style/SettingsRowSub" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/row_visit"
+            style="@style/SettingsRow">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/row_visit_title"
+                    style="@style/SettingsRowTitle" />
+
+                <TextView
+                    android:id="@+id/row_visit_sub"
+                    style="@style/SettingsRowSub" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView
+            style="@style/SettingsHeader"
+            android:text="@string/section_backup" />
+
+        <LinearLayout
+            android:id="@+id/row_backup"
+            style="@style/SettingsRow"
+            android:alpha="0.5"
+            android:clickable="false"
+            android:enabled="false">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/row_backup_title"
+                    style="@style/SettingsRowTitle" />
+
+                <TextView
+                    android:id="@+id/row_backup_sub"
+                    style="@style/SettingsRowSub" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/version"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingTop="@dimen/detail_section_gap"
+            android:paddingBottom="@dimen/form_bottom_space"
+            android:textColor="@color/text_muted"
+            android:textSize="@dimen/settings_note_size" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

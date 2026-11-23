@@ -23,6 +23,7 @@ import android.view.View;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.mama.app.data.AppointmentRepository;
@@ -133,6 +134,7 @@ public class MainActivity extends BaseActivity {
                 startActivity(OrderDetailActivity.intent(this, order.id)));
         list.setAdapter(adapter);
 
+        findViewById(R.id.btn_menu).setOnClickListener(this::showMenu);
         buildTabs();
         buildFilterChips();
         buildSearch();
@@ -159,6 +161,19 @@ public class MainActivity extends BaseActivity {
                 return true;
             }
         });
+    }
+
+    private void showMenu(View anchor) {
+        PopupMenu menu = new PopupMenu(this, anchor);
+        menu.getMenu().add(0, R.string.menu_settings, 0, R.string.menu_settings);
+        menu.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.string.menu_settings) {
+                startActivity(new Intent(this, SettingsActivity.class));
+                return true;
+            }
+            return false;
+        });
+        menu.show();
     }
 
     @Override

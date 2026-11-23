@@ -27,11 +27,14 @@
                 android:textSize="@dimen/title_text_size"
                 android:textStyle="bold" />
 
-            <!-- Holds the menu button added in a later step. -->
-            <FrameLayout
-                android:id="@+id/title_actions"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent" />
+            <ImageButton
+                android:id="@+id/btn_menu"
+                android:layout_width="@dimen/form_touch"
+                android:layout_height="@dimen/form_touch"
+                android:layout_marginEnd="4dp"
+                android:background="@drawable/icon_button_ripple"
+                android:contentDescription="@string/menu_desc"
+                android:src="@drawable/ic_more" />
         </LinearLayout>
 
         <FrameLayout

@@ -14,7 +14,9 @@ import java.util.Locale;
 
 /** Display formatting for money, dates and weekdays. */
 public final class Format {
-    private static final String AZN_SYMBOL = "₼";
+    /** Symbols the Android locale data prints as the bare code in some languages, so they are fixed. */
+    private static final java.util.Map<String, String> SYMBOLS = java.util.Map.of(
+            "AZN", "₼", "RUB", "₽", "TRY", "₺", "USD", "$", "EUR", "€", "GBP", "£");
 
     private Format() {}
 
@@ -22,12 +24,16 @@ public final class Format {
         return context.getResources().getConfiguration().getLocales().get(0);
     }
 
-    /** The currency symbol for the saved code. Android prints "AZN" for the manat, so it is forced. */
+    /** The currency symbol for the saved code. */
     public static String currencySymbol(Context context) {
-        SharedPreferences prefs = Prefs.get(context);
-        String code = prefs.getString(Prefs.KEY_CURRENCY, Prefs.DEFAULT_CURRENCY);
-        if (Prefs.DEFAULT_CURRENCY.equals(code)) {
-            return AZN_SYMBOL;
+        return currencySymbol(context, Prefs.currency(context));
+    }
+
+    /** The symbol for a currency code. */
+    public static String currencySymbol(Context context, String code) {
+        String fixed = SYMBOLS.get(code);
+        if (fixed != null) {
+            return fixed;
         }
         try {
             return Currency.getInstance(code).getSymbol(locale(context));
@@ -65,5 +71,12 @@ public final class Format {
     /** "15:00". */
     public static String time(java.time.LocalTime time) {
         return time.format(DateTimeFormatter.ofPattern("HH:mm"));
+    }
+
+    /** A time of day from minutes after midnight, in the phone's 12 or 24 hour style. */
+    public static String timeOfDay(Context context, int minutes) {
+        java.time.LocalTime t = java.time.LocalTime.of(minutes / 60, minutes % 60);
+        String pattern = android.text.format.DateFormat.is24HourFormat(context) ? "HH:mm" : "h:mm a";
+        return t.format(DateTimeFormatter.ofPattern(pattern, locale(context)));
     }
 }

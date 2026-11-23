@@ -20,6 +20,16 @@ public final class Prefs {
     public static final String KEY_REMINDER_DAYS = "reminder_days";
     public static final String DEFAULT_REMINDER_DAYS = "3,1";
 
+    /** Morning notification switch. */
+    public static final String KEY_MORNING_ON = "morning_on";
+    public static final boolean DEFAULT_MORNING_ON = true;
+    /** Morning notification time, minutes after midnight. */
+    public static final String KEY_MORNING_MINUTES = "morning_minutes";
+    public static final int DEFAULT_MORNING_MINUTES = 9 * 60;
+    /** Visit reminder lead time in minutes, 0 for off. */
+    public static final String KEY_VISIT_LEAD_MINUTES = "visit_lead_minutes";
+    public static final int DEFAULT_VISIT_LEAD_MINUTES = 60;
+
     /** Board filter: kind name, absent for any kind. */
     public static final String KEY_FILTER_KIND = "filter_kind";
     /** Board filter: garment type id, 0 or absent for any type. */
@@ -62,5 +72,28 @@ public final class Prefs {
         String csv = get(context).getString(KEY_REMINDER_DAYS, DEFAULT_REMINDER_DAYS);
         List<Integer> days = ReminderDays.parse(csv);
         return days.isEmpty() ? ReminderDays.parse(DEFAULT_REMINDER_DAYS) : days;
+    }
+
+    public static String language(Context context) {
+        return get(context).getString(KEY_LANGUAGE, DEFAULT_LANGUAGE);
+    }
+
+    public static String currency(Context context) {
+        return get(context).getString(KEY_CURRENCY, DEFAULT_CURRENCY);
+    }
+
+    public static boolean morningOn(Context context) {
+        return get(context).getBoolean(KEY_MORNING_ON, DEFAULT_MORNING_ON);
+    }
+
+    /** Minutes after midnight, always in 0..1439. */
+    public static int morningMinutes(Context context) {
+        int m = get(context).getInt(KEY_MORNING_MINUTES, DEFAULT_MORNING_MINUTES);
+        return m < 0 || m > 24 * 60 - 1 ? DEFAULT_MORNING_MINUTES : m;
+    }
+
+    /** Minutes before a visit to remind, 0 for off. */
+    public static int visitLeadMinutes(Context context) {
+        return get(context).getInt(KEY_VISIT_LEAD_MINUTES, DEFAULT_VISIT_LEAD_MINUTES);
     }
 }
