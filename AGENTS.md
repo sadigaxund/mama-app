@@ -49,6 +49,9 @@ command line with the Gradle wrapper. No Android Studio is required.
 - `adb shell am start -n com.atelier.app/.MainActivity`: launch it
 - `adb logcat -s Atelier`: read the app's own log tag
 
+CI (`.github/workflows/ci.yml`) runs `assembleDebug` and `testDebugUnitTest`
+on every push to `main` and every pull request. Device tests run only locally.
+
 ---
 
 ## 2. Devices and verification
