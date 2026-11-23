@@ -154,7 +154,7 @@ Settings, 09:00 by default. They arrive as one Android notification group.
 Collapsed, the group is a summary:
 
 ```
-Mama App · today
+Atelier · today
 1 fitting: Ivanova 15:00
 1 due today: Petrov
 1 overdue: Hasanov
@@ -215,7 +215,7 @@ testing-mode grant expires after 7 days.
 ### Drive layout
 
 ```
-Mama App/
+Atelier/
 ├── orders.db
 └── photos/
     └── <photo file name>

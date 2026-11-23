@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace "com.mama.app"
+    namespace "com.atelier.app"
     compileSdk 35
 
     defaultConfig {
-        applicationId "com.mama.app"
+        applicationId "com.atelier.app"
         minSdk 26
         targetSdk 35
         versionCode 1

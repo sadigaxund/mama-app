@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Mama App</string>
+    <string name="app_name">Atelier</string>
     <string name="board_title">Sifarişlər</string>
     <string name="board_empty">Sifariş yoxdur</string>
     <string name="coming_soon">Tezliklə</string>
@@ -210,7 +210,7 @@
     <string name="appt_board_action">Görüş</string>
     <string name="channel_morning">Səhər xülasəsi</string>
     <string name="channel_appointments">Görüşlər</string>
-    <string name="notif_today_title">Mama App · bu gün</string>
+    <string name="notif_today_title">Atelier · bu gün</string>
     <string name="notif_overdue">⚠ %1$s · %2$s · %3$s gecikib</string>
     <string name="notif_due_today">%1$s · %2$s · son tarix bu gündür</string>
     <string name="notif_due_in">%1$s · %2$s · son tarixə %3$s qalıb</string>

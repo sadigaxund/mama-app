@@ -4,7 +4,7 @@ This page says how the code is organised. `docs/design.md` says what the app doe
 
 ## Packages
 
-The package root is `com.mama.app`.
+The package root is `com.atelier.app`.
 
 | Package | Holds | Android imports |
 |---|---|---|
@@ -42,7 +42,7 @@ Activities such as `MainActivity` sit in the package root. Services get their ow
 
 ## Reminders
 
-`ReminderPlanner` (in `model`) decides which deadline items an order gets on a day. `MamaApp` runs at every process start: it creates both notification channels, installs `AppointmentScheduler` into `Reminders`, and sets the morning alarm and the visit alarms.
+`ReminderPlanner` (in `model`) decides which deadline items an order gets on a day. `AtelierApp` runs at every process start: it creates both notification channels, installs `AppointmentScheduler` into `Reminders`, and sets the morning alarm and the visit alarms.
 
 `MorningScheduler` keeps one `setWindow` alarm for the next morning time. `MorningReceiver` calls `MorningNotifier` on a background thread, then sets the next day's alarm. `MorningNotifier` posts one summary and one notification per due order. Notification ids are `Notifications.orderId(order)`. The buttons go to `ReminderActionReceiver`, which moves the order to `DONE` or sets its mode to `OFF`.
 
@@ -73,20 +73,20 @@ The `backup` package is the only code that imports `com.google.*` (`play-service
 - `DriveAuth` signs in with `AuthorizationClient.authorize` and the one scope `drive.file`. A consent screen returns through `onActivityResult`. `accessTokenBlocking` gets a token on a background thread and never opens UI. When the user must act, it throws `AUTH`, and the run records "needs sign-in". `signOut` cancels the job, clears the local state and asks Google to revoke the grant.
 - `DriveClient` talks to Drive REST v3 over `HttpURLConnection` and `org.json`. HTTP errors become `DriveException` with a reason of `AUTH`, `NETWORK`, `QUOTA` or `OTHER`. Timeouts are 30 s to connect and 60 s to read.
 - `BackupRunner.run` does one run: it stops when not signed in or when the orders table is empty, skips an unchanged state unless forced, uploads photos missing in Drive, snapshots the database and uploads it as `orders.db` last. Nothing is deleted in Drive. `BackupFingerprint` holds the change check and the photo diff as pure functions.
-- `BackupDb.snapshot` copies `mama.db` to `cacheDir/backup/orders.db` inside an exclusive transaction. `validate` opens a downloaded copy read-only and checks the orders table and `user_version`.
-- `BackupScheduler` keeps one periodic `JobScheduler` job (24 h, unmetered network, persisted). `BackupJobService` runs `BackupRunner` on its own thread. `MamaApp` schedules the job again at each process start when signed in.
-- `RestoreRunner` finds the Drive copy, downloads and validates it, downloads the photos its `order_photo` table lists, then closes every `DbHelper` on `mama.db` (`DbHelper.closeAllOnAppDatabase`) and replaces the file. It refuses when orders exist.
+- `BackupDb.snapshot` copies `atelier.db` to `cacheDir/backup/orders.db` inside an exclusive transaction. `validate` opens a downloaded copy read-only and checks the orders table and `user_version`.
+- `BackupScheduler` keeps one periodic `JobScheduler` job (24 h, unmetered network, persisted). `BackupJobService` runs `BackupRunner` on its own thread. `AtelierApp` schedules the job again at each process start when signed in.
+- `RestoreRunner` finds the Drive copy, downloads and validates it, downloads the photos its `order_photo` table lists, then closes every `DbHelper` on `atelier.db` (`DbHelper.closeAllOnAppDatabase`) and replaces the file. It refuses when orders exist.
 - `ui.BackupUi` holds the dialogs and flows for the board and Settings, so those Activities import no Google class. `MainActivity` shows the first-launch dialog once and forwards `onActivityResult`.
 
 The manifest sets `allowBackup="false"`, `fullBackupContent="false"` and `dataExtractionRules` to `res/xml/data_extraction_rules.xml`, which excludes every domain. The one-time Google Cloud setup is in `docs/backup-setup.md`.
 
 ## Debug package
 
-`com.mama.app.debug` holds code that only runs in a debuggable build. A caller checks `FLAG_DEBUGGABLE` first. `MainActivity` calls `DemoData.seedIfEmpty` when the launch intent carries the boolean extra `seed_demo`, and only while the orders table is empty. Nothing outside `MainActivity` imports the package.
+`com.atelier.app.debug` holds code that only runs in a debuggable build. A caller checks `FLAG_DEBUGGABLE` first. `MainActivity` calls `DemoData.seedIfEmpty` when the launch intent carries the boolean extra `seed_demo`, and only while the orders table is empty. Nothing outside `MainActivity` imports the package.
 
 ## Database
 
-`DbHelper` creates `mama.db`, version 1, with the six tables from `docs/design.md`. Foreign keys are on. Every child table deletes with its order. A null name opens an in-memory database for tests.
+`DbHelper` creates `atelier.db`, version 1, with the six tables from `docs/design.md`. Foreign keys are on. Every child table deletes with its order. A null name opens an in-memory database for tests.
 
 SQLite `COLLATE NOCASE` folds ASCII letters only. `GarmentTypeRepository.add` therefore also compares names in Java, so "костюм" matches "Костюм". `OrderRepository.search` folds case in Java for the same reason.
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Mama App</string>
+    <string name="app_name">Atelier</string>
     <string name="board_title">Orders</string>
     <string name="board_empty">No orders</string>
     <string name="coming_soon">Coming soon</string>
@@ -213,7 +213,7 @@
     <string name="appt_board_action">Visit</string>
     <string name="channel_morning">Morning summary</string>
     <string name="channel_appointments">Visits</string>
-    <string name="notif_today_title">Mama App · today</string>
+    <string name="notif_today_title">Atelier · today</string>
     <string name="notif_overdue">⚠ %1$s · %2$s · overdue %3$s</string>
     <string name="notif_due_today">%1$s · %2$s · due today</string>
     <string name="notif_due_in">%1$s · %2$s · due in %3$s</string>

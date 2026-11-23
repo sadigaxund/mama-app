@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Mama App</string>
+    <string name="app_name">Atelier</string>
     <string name="board_title">Заказы</string>
     <string name="board_empty">Нет заказов</string>
     <string name="coming_soon">Скоро будет</string>
@@ -212,7 +212,7 @@
     <string name="appt_board_action">Визит</string>
     <string name="channel_morning">Утренняя сводка</string>
     <string name="channel_appointments">Визиты</string>
-    <string name="notif_today_title">Mama App · сегодня</string>
+    <string name="notif_today_title">Atelier · сегодня</string>
     <string name="notif_overdue">⚠ %1$s · %2$s · просрочен %3$s</string>
     <string name="notif_due_today">%1$s · %2$s · срок сегодня</string>
     <string name="notif_due_in">%1$s · %2$s · срок через %3$s</string>

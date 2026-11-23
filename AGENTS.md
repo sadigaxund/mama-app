@@ -46,8 +46,8 @@ command line with the Gradle wrapper. No Android Studio is required.
   the framework `android.test` runner (no AndroidX)
 - `adb devices -l`: list attached devices
 - `adb install -r <apk>`: install or update the app
-- `adb shell am start -n com.mama.app/.MainActivity`: launch it
-- `adb logcat -s MamaApp`: read the app's own log tag
+- `adb shell am start -n com.atelier.app/.MainActivity`: launch it
+- `adb logcat -s Atelier`: read the app's own log tag
 
 ---
 

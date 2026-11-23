@@ -16,7 +16,7 @@
         </intent>
     </queries>
     <application
-        android:name=".MamaApp"
+        android:name=".AtelierApp"
         android:allowBackup="false"
         android:fullBackupContent="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -36,7 +36,7 @@
             android:exported="false"
             android:theme="@style/PhotoViewerTheme" />
         <provider
-            android:name="com.mama.app.photo.AppFileProvider"
+            android:name="com.atelier.app.photo.AppFileProvider"
             android:authorities="${applicationId}.files"
             android:exported="false"
             android:grantUriPermissions="true" />
