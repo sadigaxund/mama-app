@@ -79,6 +79,21 @@
                 android:gravity="center_vertical">
 
                 <TextView
+                    android:id="@+id/stage_chip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/chip_margin_start"
+                    android:paddingStart="@dimen/chip_padding_horizontal"
+                    android:paddingEnd="@dimen/chip_padding_horizontal"
+                    android:paddingTop="@dimen/chip_padding_vertical"
+                    android:paddingBottom="@dimen/chip_padding_vertical"
+                    android:singleLine="true"
+                    android:textColor="@color/accent"
+                    android:textSize="@dimen/chip_text_size"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+
+                <TextView
                     android:id="@+id/line2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

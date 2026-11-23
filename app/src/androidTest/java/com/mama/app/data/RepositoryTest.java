@@ -8,6 +8,7 @@ import com.mama.app.model.Kind;
 import com.mama.app.model.LedgerEntry;
 import com.mama.app.model.LedgerType;
 import com.mama.app.model.Order;
+import com.mama.app.model.OrderFilter;
 import com.mama.app.model.OrderPhoto;
 import com.mama.app.model.ReminderMode;
 import com.mama.app.model.Stage;
@@ -258,6 +259,33 @@ public class RepositoryTest extends AndroidTestCase {
         assertEquals(0, orders.search("zzz").size());
         assertEquals(0, orders.search("  ").size());
         assertEquals(0, orders.search("%").size());
+    }
+
+    public void testFilteredListCountsAndSearch() {
+        long t1 = typeId();
+        long t2 = types.listActive().get(1).id;
+        long a = orders.insert(new Order(0, "Иванова Анна", null, Kind.TAILORING, t1, 1,
+                LocalDate.ofEpochDay(5), null, Stage.CUTTING, 0, 0, ReminderMode.DEFAULT), 0, 1);
+        long b = orders.insert(new Order(0, "Иванова Мария", null, Kind.REPAIR, t2, 1,
+                LocalDate.ofEpochDay(2), null, Stage.CUTTING, 0, 0, ReminderMode.DEFAULT), 0, 1);
+        long c = orders.insert(new Order(0, "Иванов Петр", null, Kind.REPAIR, t1, 1,
+                LocalDate.ofEpochDay(9), null, Stage.ACCEPTED, 0, 0, ReminderMode.DEFAULT), 0, 1);
+        orders.moveTo(c, Stage.DONE, 50);
+        OrderFilter repair = OrderFilter.NONE.withKind(Kind.REPAIR);
+        assertEquals(1, orders.listByStage(Stage.CUTTING, repair).size());
+        assertEquals(b, orders.listByStage(Stage.CUTTING, repair).get(0).id);
+        assertEquals(2, orders.listByStage(Stage.CUTTING, OrderFilter.NONE).size());
+        assertEquals(1, (int) orders.countsByStage(repair).get(Stage.CUTTING));
+        assertEquals(1, (int) orders.countsByStage(repair).get(Stage.DONE));
+        assertEquals(0, (int) orders.countsByStage(OrderFilter.NONE.withGarmentType(t2)).get(Stage.DONE));
+        assertEquals(2, orders.search("ИВАНОВА", OrderFilter.NONE).size());
+        assertEquals(b, orders.search("иванова", repair).get(0).id);
+        assertEquals(1, orders.search("иванов", OrderFilter.NONE.withGarmentType(t1).withKind(Kind.TAILORING)).size());
+        // Active first by deadline, DONE last.
+        List<Order> all = orders.search("иванов", OrderFilter.NONE);
+        assertEquals(b, all.get(0).id);
+        assertEquals(a, all.get(1).id);
+        assertEquals(c, all.get(2).id);
     }
 
     public void testCascadeDelete() {

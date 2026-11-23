@@ -20,4 +20,6 @@
     <color name="undo_bar_bg">#323232</color>
     <color name="undo_bar_text">#FFFFFF</color>
     <color name="ripple">#1F000000</color>
+    <color name="chip_selected_bg">#EDE3F3</color>
+    <color name="stage_chip_bg">#FFFFFF</color>
 </resources>

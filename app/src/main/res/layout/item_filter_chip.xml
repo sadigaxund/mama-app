@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 48dp touch target around a 32dp chip. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="@dimen/filter_touch"
+    android:clickable="true"
+    android:focusable="true"
+    android:paddingStart="@dimen/filter_chip_gap_half"
+    android:paddingEnd="@dimen/filter_chip_gap_half">
+
+    <TextView
+        android:id="@+id/chip_text"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/filter_chip_height"
+        android:layout_gravity="center_vertical"
+        android:gravity="center"
+        android:minWidth="@dimen/filter_chip_min_width"
+        android:paddingStart="@dimen/filter_chip_padding"
+        android:paddingEnd="@dimen/filter_chip_padding"
+        android:singleLine="true"
+        android:textSize="@dimen/body_text_size" />
+</FrameLayout>

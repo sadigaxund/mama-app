@@ -34,9 +34,17 @@ public class OrderCardAdapter extends BaseAdapter {
         public final long balanceMinor;
         public final Bitmap photo;
         public final LocalDateTime nextAppointment;
+        /** The stage name shown as a chip on line 2, or null for no chip. */
+        public final String stageLabel;
 
         public Row(Order order, String garmentName, long balanceMinor, Bitmap photo,
                    LocalDateTime nextAppointment) {
+            this(order, garmentName, balanceMinor, photo, nextAppointment, null);
+        }
+
+        public Row(Order order, String garmentName, long balanceMinor, Bitmap photo,
+                   LocalDateTime nextAppointment, String stageLabel) {
+            this.stageLabel = stageLabel;
             this.order = order;
             this.garmentName = garmentName;
             this.balanceMinor = balanceMinor;
@@ -110,6 +118,18 @@ public class OrderCardAdapter extends BaseAdapter {
 
         ((TextView) v.findViewById(R.id.number)).setText(context.getString(R.string.order_number, o.id));
         ((TextView) v.findViewById(R.id.name)).setText(o.customerName);
+
+        TextView stageChip = v.findViewById(R.id.stage_chip);
+        if (row.stageLabel != null) {
+            GradientDrawable cb = new GradientDrawable();
+            cb.setColor(context.getColor(R.color.stage_chip_bg));
+            cb.setCornerRadius(context.getResources().getDimension(R.dimen.chip_radius));
+            stageChip.setBackground(cb);
+            stageChip.setText(row.stageLabel);
+            stageChip.setVisibility(View.VISIBLE);
+        } else {
+            stageChip.setVisibility(View.GONE);
+        }
 
         TextView line2 = v.findViewById(R.id.line2);
         View chip = v.findViewById(R.id.overdue_chip);

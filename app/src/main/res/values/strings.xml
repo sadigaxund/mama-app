@@ -106,4 +106,12 @@
     <string name="ledger_payment_amount">− %1$s</string>
     <string name="no_contacts_app">No contacts app found</string>
     <string name="no_dialer_app">No phone app found</string>
+    <string name="search_hint">Name, phone, #</string>
+    <string name="search_clear_desc">Clear search</string>
+    <string name="search_empty">Nothing found</string>
+    <string name="filter_all">All</string>
+    <string name="filter_type">Type ▾</string>
+    <string name="filter_type_all">All types</string>
+    <string name="filter_type_title">Garment type</string>
+    <string name="filter_reset">Reset</string>
 </resources>

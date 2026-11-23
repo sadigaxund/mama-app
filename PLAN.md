@@ -17,7 +17,7 @@ step lands as one commit and is checked on a device before it is ticked.
 5. [x] Moving orders: arrow button and long-press menu
 6. [x] Order detail with ledger: add payment, add expense, balance
 7. [x] Phone: contacts picker and call button
-8. [ ] Search, filter, sort
+8. [x] Search, filter, sort
 9. [ ] Settings: language (RU default, AZ, EN) and currency (AZN default)
 10. [ ] Photos: camera and gallery, card thumbnail, full-screen view
 11. [ ] Appointments: add, edit, delete, banner on fitting and done moves

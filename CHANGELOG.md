@@ -7,3 +7,4 @@
 - Orders move with the card arrow or a long-press menu, and every move can be undone for 4 seconds.
 - Order detail screen with payments, expenses and the balance due, plus edit and delete.
 - Phone numbers can be picked from contacts, and the call button opens the dialer.
+- Search by name, phone or order number, and filter by kind or garment type.

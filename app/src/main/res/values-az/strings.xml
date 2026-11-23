@@ -106,4 +106,12 @@
     <string name="ledger_payment_amount">− %1$s</string>
     <string name="no_contacts_app">Kontaktlar tətbiqi tapılmadı</string>
     <string name="no_dialer_app">Telefon tətbiqi tapılmadı</string>
+    <string name="search_hint">Ad, telefon, №</string>
+    <string name="search_clear_desc">Axtarışı təmizlə</string>
+    <string name="search_empty">Heç nə tapılmadı</string>
+    <string name="filter_all">Hamısı</string>
+    <string name="filter_type">Növ ▾</string>
+    <string name="filter_type_all">Bütün növlər</string>
+    <string name="filter_type_title">Məmulat növü</string>
+    <string name="filter_reset">Sıfırla</string>
 </resources>

@@ -108,4 +108,12 @@
     <string name="ledger_payment_amount">− %1$s</string>
     <string name="no_contacts_app">Приложение контактов не найдено</string>
     <string name="no_dialer_app">Приложение телефона не найдено</string>
+    <string name="search_hint">Имя, телефон, №</string>
+    <string name="search_clear_desc">Очистить поиск</string>
+    <string name="search_empty">Ничего не найдено</string>
+    <string name="filter_all">Все</string>
+    <string name="filter_type">Тип ▾</string>
+    <string name="filter_type_all">Все типы</string>
+    <string name="filter_type_title">Тип изделия</string>
+    <string name="filter_reset">Сбросить</string>
 </resources>

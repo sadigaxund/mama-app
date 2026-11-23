@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import com.mama.app.model.Kind;
 import com.mama.app.model.LedgerType;
 import com.mama.app.model.Order;
+import com.mama.app.model.OrderFilter;
 import com.mama.app.model.ReminderMode;
 import com.mama.app.model.Stage;
 
@@ -133,6 +134,34 @@ public class OrderRepository {
         return out;
     }
 
+    /** Orders of a stage that pass the filter, in listByStage order. */
+    public List<Order> listByStage(Stage stage, OrderFilter filter) {
+        List<Order> out = new ArrayList<>();
+        for (Order o : listByStage(stage)) {
+            if (filter.matches(o)) {
+                out.add(o);
+            }
+        }
+        return out;
+    }
+
+    /** Like countsByStage, counting only orders that pass the filter. */
+    public Map<Stage, Integer> countsByStage(OrderFilter filter) {
+        Map<Stage, Integer> out = new EnumMap<>(Stage.class);
+        for (Stage s : Stage.values()) {
+            out.put(s, 0);
+        }
+        try (Cursor c = helper.getReadableDatabase().query("orders", COLS, null, null, null, null, null)) {
+            while (c.moveToNext()) {
+                Order o = read(c);
+                if (filter.matches(o)) {
+                    out.put(o.stage, out.get(o.stage) + 1);
+                }
+            }
+        }
+        return out;
+    }
+
     /** Order count per stage. Every stage has an entry, zero when empty. */
     public Map<Stage, Integer> countsByStage() {
         Map<Stage, Integer> out = new EnumMap<>(Stage.class);
@@ -213,6 +242,18 @@ public class OrderRepository {
                 }
             }
         }
+        return out;
+    }
+
+    /** search(query) narrowed by the filter, active stages first by deadline, then DONE newest first. */
+    public List<Order> search(String query, OrderFilter filter) {
+        List<Order> out = new ArrayList<>();
+        for (Order o : search(query)) {
+            if (filter.matches(o)) {
+                out.add(o);
+            }
+        }
+        Collections.sort(out, OrderFilter.SEARCH_ORDER);
         return out;
     }
 

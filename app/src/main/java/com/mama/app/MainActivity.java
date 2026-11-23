@@ -5,6 +5,13 @@ import android.content.pm.ApplicationInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.app.AlertDialog;
+import android.graphics.drawable.GradientDrawable;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AbsListView;
+import android.widget.EditText;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -27,11 +34,14 @@ import com.mama.app.data.PhotoRepository;
 import com.mama.app.debug.DemoData;
 import com.mama.app.model.Appointment;
 import com.mama.app.model.GarmentType;
+import com.mama.app.model.Kind;
 import com.mama.app.model.Order;
+import com.mama.app.model.OrderFilter;
 import com.mama.app.model.OrderPhoto;
 import com.mama.app.model.Stage;
 import com.mama.app.ui.BaseActivity;
 import com.mama.app.ui.OrderCardAdapter;
+import com.mama.app.ui.Prefs;
 
 import java.io.File;
 import java.time.Instant;
@@ -67,6 +77,20 @@ public class MainActivity extends BaseActivity {
     private boolean trackingSwipe;
     private int selected = 0;
 
+    private static final long SEARCH_DEBOUNCE_MILLIS = 250;
+    private EditText searchField;
+    private View searchClear;
+    private View tabRule;
+    private String searchQuery = "";
+    private OrderFilter filter = OrderFilter.NONE;
+    private final Runnable applySearch = this::applySearchText;
+    private View chipAll;
+    private View chipTailoring;
+    private View chipRepair;
+    private View chipType;
+    private View chipReset;
+    private List<GarmentType> typeList = new ArrayList<>();
+
     private static final long UNDO_MILLIS = 4000;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Runnable hideUndo = this::hideUndoBar;
@@ -99,7 +123,9 @@ public class MainActivity extends BaseActivity {
             selected = savedInstanceState.getInt(STATE_STAGE, 0);
         }
 
+        filter = Prefs.filter(this);
         tabScroll = findViewById(R.id.tab_scroll);
+        tabRule = findViewById(R.id.tab_rule);
         list = findViewById(R.id.order_list);
         emptyText = findViewById(R.id.empty_text);
         adapter = new OrderCardAdapter(this, order -> moveForward(order), this::showMoveMenu);
@@ -108,6 +134,8 @@ public class MainActivity extends BaseActivity {
         list.setAdapter(adapter);
 
         buildTabs();
+        buildFilterChips();
+        buildSearch();
         fab = findViewById(R.id.fab);
         undoBar = findViewById(R.id.undo_bar);
         findViewById(R.id.undo_action).setOnClickListener(v -> undoMove());
@@ -118,7 +146,7 @@ public class MainActivity extends BaseActivity {
         swipeDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onFling(MotionEvent e1, MotionEvent e2, float vx, float vy) {
-                if (e1 == null || e2 == null) {
+                if (e1 == null || e2 == null || isSearching()) {
                     return false;
                 }
                 float dx = e2.getX() - e1.getX();
@@ -160,8 +188,19 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        if (isSearching()) {
+            searchField.setText("");
+            applySearchText();
+            return;
+        }
+        super.onBackPressed();
+    }
+
+    @Override
     protected void onDestroy() {
         handler.removeCallbacks(hideUndo);
+        handler.removeCallbacks(applySearch);
         db.close();
         super.onDestroy();
     }
@@ -177,6 +216,150 @@ public class MainActivity extends BaseActivity {
             swipeDetector.onTouchEvent(ev);
         }
         return super.dispatchTouchEvent(ev);
+    }
+
+    private boolean isSearching() {
+        return !searchQuery.isEmpty();
+    }
+
+    private void buildSearch() {
+        searchField = findViewById(R.id.search_field);
+        searchClear = findViewById(R.id.search_clear);
+        searchField.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int a, int b, int c) {}
+            @Override public void onTextChanged(CharSequence s, int a, int b, int c) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                searchClear.setVisibility(s.length() > 0 ? View.VISIBLE : View.GONE);
+                handler.removeCallbacks(applySearch);
+                // Clearing the field leaves search mode at once. Typing waits for the debounce.
+                if (s.toString().trim().isEmpty()) {
+                    applySearchText();
+                } else {
+                    handler.postDelayed(applySearch, SEARCH_DEBOUNCE_MILLIS);
+                }
+            }
+        });
+        searchField.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                handler.removeCallbacks(applySearch);
+                applySearchText();
+                hideKeyboard();
+                return true;
+            }
+            return false;
+        });
+        searchClear.setOnClickListener(v -> searchField.setText(""));
+        list.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int state) {
+                if (state == SCROLL_STATE_TOUCH_SCROLL) {
+                    hideKeyboard();
+                }
+            }
+
+            @Override
+            public void onScroll(AbsListView v, int first, int visible, int total) {}
+        });
+    }
+
+    private void hideKeyboard() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(searchField.getWindowToken(), 0);
+    }
+
+    private void applySearchText() {
+        String q = searchField.getText().toString().trim();
+        if (q.equals(searchQuery)) {
+            return;
+        }
+        searchQuery = q;
+        refresh(true);
+    }
+
+    private void buildFilterChips() {
+        LinearLayout strip = findViewById(R.id.filter_strip);
+        chipAll = addChip(strip, getString(R.string.filter_all), v -> setFilter(filter.withKind(null)));
+        chipTailoring = addChip(strip, getString(R.string.kind_tailoring),
+                v -> setFilter(filter.withKind(Kind.TAILORING)));
+        chipRepair = addChip(strip, getString(R.string.kind_repair),
+                v -> setFilter(filter.withKind(Kind.REPAIR)));
+        chipType = addChip(strip, getString(R.string.filter_type), v -> showTypeDialog());
+        chipReset = addChip(strip, getString(R.string.filter_reset), v -> setFilter(OrderFilter.NONE));
+    }
+
+    private View addChip(LinearLayout strip, String label, View.OnClickListener click) {
+        View chip = LayoutInflater.from(this).inflate(R.layout.item_filter_chip, strip, false);
+        ((TextView) chip.findViewById(R.id.chip_text)).setText(label);
+        chip.setOnClickListener(click);
+        strip.addView(chip);
+        return chip;
+    }
+
+    private void setFilter(OrderFilter f) {
+        filter = f;
+        Prefs.saveFilter(this, f);
+        refresh(true);
+    }
+
+    private void showTypeDialog() {
+        typeList = garmentTypes.listAll();
+        String[] labels = new String[typeList.size() + 1];
+        labels[0] = getString(R.string.filter_type_all);
+        int checked = 0;
+        for (int i = 0; i < typeList.size(); i++) {
+            labels[i + 1] = typeList.get(i).name;
+            if (typeList.get(i).id == filter.garmentTypeId) {
+                checked = i + 1;
+            }
+        }
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.filter_type_title)
+                .setSingleChoiceItems(labels, checked, (d, which) -> {
+                    setFilter(filter.withGarmentType(which == 0 ? 0 : typeList.get(which - 1).id));
+                    d.dismiss();
+                })
+                .setNegativeButton(R.string.action_cancel, null)
+                .show();
+    }
+
+    /** Styles one chip: selected chips take the given colors, others a white outline. */
+    private void styleChip(View chip, boolean on, int fill, int stroke, int text) {
+        TextView t = chip.findViewById(R.id.chip_text);
+        GradientDrawable d = new GradientDrawable();
+        d.setCornerRadius(getResources().getDimension(R.dimen.filter_chip_radius));
+        d.setColor(on ? fill : getColor(R.color.field_bg));
+        d.setStroke(getResources().getDimensionPixelSize(R.dimen.form_stroke),
+                on ? stroke : getColor(R.color.field_stroke));
+        t.setBackground(d);
+        t.setTextColor(on ? text : getColor(R.color.text_primary));
+        t.setTypeface(null, on ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
+        chip.setSelected(on);
+    }
+
+    private void updateFilterChips() {
+        int accent = getColor(R.color.accent);
+        int accentFill = getColor(R.color.chip_selected_bg);
+        styleChip(chipAll, filter.kind == null, accentFill, accent, accent);
+        styleChip(chipTailoring, filter.kind == Kind.TAILORING, getColor(R.color.kind_tailoring_bg),
+                getColor(R.color.kind_tailoring_stripe), getColor(R.color.kind_tailoring_stripe));
+        styleChip(chipRepair, filter.kind == Kind.REPAIR, getColor(R.color.kind_repair_bg),
+                getColor(R.color.kind_repair_stripe), getColor(R.color.kind_repair_stripe));
+        TextView type = chipType.findViewById(R.id.chip_text);
+        String name = null;
+        if (filter.garmentTypeId != 0) {
+            for (GarmentType t : garmentTypes.listAll()) {
+                if (t.id == filter.garmentTypeId) {
+                    name = t.name;
+                }
+            }
+        }
+        type.setText(name == null ? getString(R.string.filter_type) : name + " ▾");
+        styleChip(chipType, filter.garmentTypeId != 0, accentFill, accent, accent);
+        chipReset.setVisibility(filter.isActive() ? View.VISIBLE : View.GONE);
+        ((TextView) chipReset.findViewById(R.id.chip_text)).setTextColor(accent);
+        ((TextView) chipReset.findViewById(R.id.chip_text)).setBackground(null);
     }
 
     private void moveForward(Order order) {
@@ -287,7 +470,11 @@ public class MainActivity extends BaseActivity {
 
     /** Reloads counts and the selected stage's cards. */
     private void refresh(boolean resetScroll) {
-        Map<Stage, Integer> counts = orders.countsByStage();
+        updateFilterChips();
+        boolean searching = isSearching();
+        tabScroll.setVisibility(searching ? View.GONE : View.VISIBLE);
+        tabRule.setVisibility(searching ? View.GONE : View.VISIBLE);
+        Map<Stage, Integer> counts = orders.countsByStage(filter);
         for (int i = 0; i < stages.length; i++) {
             View tab = tabViews.get(i);
             boolean on = i == selected;
@@ -309,29 +496,32 @@ public class MainActivity extends BaseActivity {
             tabScroll.smoothScrollTo(Math.max(0, target), 0);
         });
 
-        List<OrderCardAdapter.Row> rows = loadRows(stages[selected]);
+        List<OrderCardAdapter.Row> rows = searching
+                ? loadRows(orders.search(searchQuery, filter), true)
+                : loadRows(orders.listByStage(stages[selected], filter), false);
         adapter.setRows(rows, LocalDate.now());
-        if (resetScroll) {
+        if (resetScroll && !rows.isEmpty()) {
             list.setSelection(0);
         }
+        ((TextView) emptyText).setText(searching ? R.string.search_empty : R.string.board_empty);
         emptyText.setVisibility(rows.isEmpty() ? View.VISIBLE : View.GONE);
         list.setVisibility(rows.isEmpty() ? View.GONE : View.VISIBLE);
     }
 
-    private List<OrderCardAdapter.Row> loadRows(Stage stage) {
+    private List<OrderCardAdapter.Row> loadRows(List<Order> found, boolean showStage) {
         Map<Long, String> typeNames = new HashMap<>();
         for (GarmentType t : garmentTypes.listAll()) {
             typeNames.put(t.id, t.name);
         }
         long now = System.currentTimeMillis();
         List<OrderCardAdapter.Row> rows = new ArrayList<>();
-        for (Order o : orders.listByStage(stage)) {
+        for (Order o : found) {
             String type = typeNames.get(o.garmentTypeId);
             Appointment next = appointments.nextUpcoming(o.id, now);
             LocalDateTime when = next == null ? null
                     : LocalDateTime.ofInstant(Instant.ofEpochMilli(next.startsAt), ZoneId.systemDefault());
             rows.add(new OrderCardAdapter.Row(o, type == null ? "" : type, ledger.balanceDue(o.id),
-                    loadThumb(o.id), when));
+                    loadThumb(o.id), when, showStage ? getString(stageLabel(o.stage)) : null));
         }
         return rows;
     }
