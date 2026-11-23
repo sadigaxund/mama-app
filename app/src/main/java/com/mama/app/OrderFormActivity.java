@@ -554,7 +554,7 @@ public class OrderFormActivity extends BaseActivity {
                     row.addView(t, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
                     ImageButton rm = new ImageButton(OrderFormActivity.this);
                     rm.setImageResource(R.drawable.ic_remove);
-                    rm.setBackgroundResource(android.R.drawable.list_selector_background);
+                    rm.setBackgroundResource(R.drawable.icon_button_ripple);
                     rm.setContentDescription(getString(R.string.reminders_remove_desc));
                     rm.setOnClickListener(v -> {
                         days.remove(d);

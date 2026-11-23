@@ -103,6 +103,8 @@ public class MainActivity extends BaseActivity {
         list = findViewById(R.id.order_list);
         emptyText = findViewById(R.id.empty_text);
         adapter = new OrderCardAdapter(this, order -> moveForward(order), this::showMoveMenu);
+        adapter.setClickListener(order ->
+                startActivity(OrderDetailActivity.intent(this, order.id)));
         list.setAdapter(adapter);
 
         buildTabs();

@@ -19,4 +19,5 @@
     <color name="tab_badge_idle_bg">#EDE3F3</color>
     <color name="undo_bar_bg">#323232</color>
     <color name="undo_bar_text">#FFFFFF</color>
+    <color name="ripple">#1F000000</color>
 </resources>

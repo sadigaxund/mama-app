@@ -55,12 +55,18 @@ public class OrderCardAdapter extends BaseAdapter {
         void onLongPress(Order order);
     }
 
+    /** Called when a card is tapped. */
+    public interface ClickListener {
+        void onClick(Order order);
+    }
+
     private static final int PLACEHOLDER_ALPHA = 0x33;
 
     private final Context context;
     private final LayoutInflater inflater;
     private final ArrowListener arrowListener;
     private final LongPressListener longPressListener;
+    private ClickListener clickListener;
     private List<Row> rows = new ArrayList<>();
     private LocalDate today = LocalDate.now();
 
@@ -70,6 +76,10 @@ public class OrderCardAdapter extends BaseAdapter {
         this.longPressListener = longPressListener;
         this.inflater = LayoutInflater.from(context);
         this.arrowListener = arrowListener;
+    }
+
+    public void setClickListener(ClickListener listener) {
+        this.clickListener = listener;
     }
 
     public void setRows(List<Row> rows, LocalDate today) {
@@ -94,7 +104,7 @@ public class OrderCardAdapter extends BaseAdapter {
                 ? R.color.kind_tailoring_stripe : R.color.kind_repair_stripe);
         int bg = context.getColor(o.kind == Kind.TAILORING
                 ? R.color.kind_tailoring_bg : R.color.kind_repair_bg);
-        v.findViewById(R.id.card).setBackground(cardBackground(bg, stripe));
+        v.findViewById(R.id.card).setBackground(cardBackground(context, bg, stripe));
 
         FrameSlot.bind(v, row, stripe, context);
 
@@ -106,7 +116,7 @@ public class OrderCardAdapter extends BaseAdapter {
         boolean overdue = o.stage != Stage.DONE && o.deadline.isBefore(today);
         if (overdue) {
             line2.setText(context.getString(R.string.card_line2_overdue, row.garmentName));
-            chip.setBackground(chipBackground());
+            chip.setBackground(chipBackground(context));
             chip.setVisibility(View.VISIBLE);
         } else {
             line2.setText(context.getString(R.string.card_line2_due, row.garmentName,
@@ -131,6 +141,11 @@ public class OrderCardAdapter extends BaseAdapter {
 
         // On the card, not the list: isEnabled is false, so the list never reports item long
         // presses. The arrow button is clickable and not long-clickable, so it keeps its touches.
+        v.findViewById(R.id.card).setOnClickListener(c -> {
+            if (clickListener != null) {
+                clickListener.onClick(o);
+            }
+        });
         v.findViewById(R.id.card).setOnLongClickListener(c -> {
             longPressListener.onLongPress(o);
             return true;
@@ -148,7 +163,7 @@ public class OrderCardAdapter extends BaseAdapter {
     }
 
     /** Tinted rounded card with a stripe on the left edge. */
-    private LayerDrawable cardBackground(int bg, int stripe) {
+    public static LayerDrawable cardBackground(Context context, int bg, int stripe) {
         float r = context.getResources().getDimension(R.dimen.card_radius);
         GradientDrawable stripeShape = new GradientDrawable();
         stripeShape.setColor(stripe);
@@ -161,7 +176,7 @@ public class OrderCardAdapter extends BaseAdapter {
         return layers;
     }
 
-    private GradientDrawable chipBackground() {
+    public static GradientDrawable chipBackground(Context context) {
         GradientDrawable d = new GradientDrawable();
         d.setColor(context.getColor(R.color.overdue_bg));
         d.setCornerRadius(context.getResources().getDimension(R.dimen.chip_radius));

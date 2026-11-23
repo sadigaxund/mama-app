@@ -54,4 +54,10 @@
     <dimen name="undo_bar_radius">8dp</dimen>
     <dimen name="undo_bar_text_size">14sp</dimen>
     <dimen name="undo_action_padding">16dp</dimen>
+    <dimen name="detail_name_text_size">22sp</dimen>
+    <dimen name="detail_section_gap">20dp</dimen>
+    <dimen name="detail_section_text_size">14sp</dimen>
+    <dimen name="detail_row_height">44dp</dimen>
+    <dimen name="detail_button_height">48dp</dimen>
+    <dimen name="detail_header_padding">16dp</dimen>
 </resources>

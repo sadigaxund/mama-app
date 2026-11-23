@@ -16,7 +16,7 @@
             android:layout_width="@dimen/form_touch"
             android:layout_height="@dimen/form_touch"
             android:layout_marginStart="4dp"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:background="@drawable/icon_button_ripple"
             android:contentDescription="@string/form_close_desc"
             android:src="@drawable/ic_close" />
 
@@ -117,7 +117,7 @@
                         android:layout_height="@dimen/form_touch"
                         android:layout_marginStart="4dp"
                         android:alpha="0.5"
-                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:background="@drawable/icon_button_ripple"
                         android:contentDescription="@string/phone_contacts_desc"
                         android:src="@drawable/ic_contacts" />
                 </LinearLayout>

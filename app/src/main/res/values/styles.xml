@@ -34,4 +34,34 @@
         <item name="android:textSize">@dimen/form_error_size</item>
         <item name="android:visibility">gone</item>
     </style>
+
+    <style name="DetailSection">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">@dimen/detail_section_gap</item>
+        <item name="android:paddingBottom">6dp</item>
+        <item name="android:textColor">@color/text_muted</item>
+        <item name="android:textSize">@dimen/detail_section_text_size</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="DetailBox">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/field_bg</item>
+        <item name="android:paddingStart">@dimen/form_field_padding</item>
+        <item name="android:paddingEnd">@dimen/form_field_padding</item>
+        <item name="android:paddingTop">@dimen/form_field_padding</item>
+        <item name="android:paddingBottom">@dimen/form_field_padding</item>
+    </style>
+
+    <style name="DetailTextButton" parent="android:Widget.Material.Button.Borderless">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">@dimen/detail_button_height</item>
+        <item name="android:minHeight">@dimen/detail_button_height</item>
+        <item name="android:textColor">@color/accent</item>
+        <item name="android:textSize">@dimen/body_text_size</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textStyle">bold</item>
+    </style>
 </resources>

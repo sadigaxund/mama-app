@@ -15,7 +15,7 @@ step lands as one commit and is checked on a device before it is ticked.
 3. [x] Board: stage tabs, cards with kind colors, read-only
 4. [x] Order form: create and edit, garment type picker with "+ New type"
 5. [x] Moving orders: arrow button and long-press menu
-6. [ ] Order detail with ledger: add payment, add expense, balance
+6. [x] Order detail with ledger: add payment, add expense, balance
 7. [ ] Phone: contacts picker and call button
 8. [ ] Search, filter, sort
 9. [ ] Settings: language (RU default, AZ, EN) and currency (AZN default)
