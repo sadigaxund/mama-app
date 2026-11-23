@@ -45,9 +45,9 @@
     <dimen name="form_text_size">16sp</dimen>
     <dimen name="form_error_size">12sp</dimen>
     <dimen name="form_bottom_space">32dp</dimen>
-    <dimen name="tab_badge_height">20dp</dimen>
+    <dimen name="tab_badge_height">20sp</dimen>
     <dimen name="tab_badge_gap">6dp</dimen>
-    <dimen name="tab_badge_padding">6dp</dimen>
+    <dimen name="tab_badge_padding">6sp</dimen>
     <dimen name="tab_badge_text_size">12sp</dimen>
     <dimen name="undo_bar_height">48dp</dimen>
     <dimen name="undo_bar_margin">12dp</dimen>

@@ -33,6 +33,7 @@
             android:layout_marginStart="@dimen/tab_badge_gap"
             android:background="@drawable/tab_badge_bg"
             android:gravity="center"
+            android:includeFontPadding="false"
             android:minWidth="@dimen/tab_badge_height"
             android:paddingStart="@dimen/tab_badge_padding"
             android:paddingEnd="@dimen/tab_badge_padding"
