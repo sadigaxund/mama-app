@@ -31,11 +31,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mama.app.data.AppointmentRepository;
 import com.mama.app.data.DbHelper;
 import com.mama.app.data.GarmentTypeRepository;
 import com.mama.app.data.LedgerRepository;
 import com.mama.app.data.OrderRepository;
 import com.mama.app.data.PhotoRepository;
+import com.mama.app.model.Appointment;
 import com.mama.app.model.GarmentType;
 import com.mama.app.model.Kind;
 import com.mama.app.model.LedgerEntry;
@@ -46,6 +48,7 @@ import com.mama.app.model.OrderPhoto;
 import com.mama.app.model.Stage;
 import com.mama.app.photo.AppFileProvider;
 import com.mama.app.photo.PhotoStore;
+import com.mama.app.ui.AppointmentFlow;
 import com.mama.app.ui.BaseActivity;
 import com.mama.app.ui.Format;
 import com.mama.app.ui.Intents;
@@ -74,6 +77,10 @@ public class OrderDetailActivity extends BaseActivity {
     private GarmentTypeRepository garmentTypes;
     private LedgerRepository ledger;
     private PhotoRepository photos;
+    private AppointmentRepository appointments;
+    private AppointmentFlow appointmentFlow;
+    private boolean showPastAll;
+    private boolean bookPrompt;
     private PhotoStore photoStore;
     private long orderId;
     private AlertDialog openDialog;
@@ -94,6 +101,8 @@ public class OrderDetailActivity extends BaseActivity {
         garmentTypes = new GarmentTypeRepository(db);
         ledger = new LedgerRepository(db);
         photos = new PhotoRepository(db);
+        appointments = new AppointmentRepository(db);
+        appointmentFlow = new AppointmentFlow(this, appointments, this::refresh);
         photoStore = new PhotoStore(this);
         if (savedInstanceState != null && savedInstanceState.getString(STATE_CAMERA_FILE) != null) {
             cameraFile = new File(new File(getCacheDir(), AppFileProvider.DIR_CAMERA),
@@ -107,7 +116,16 @@ public class OrderDetailActivity extends BaseActivity {
         findViewById(R.id.btn_delete).setOnClickListener(v -> confirmDeleteOrder());
         findViewById(R.id.btn_call).setOnClickListener(v -> dial());
         findViewById(R.id.btn_add_photo).setOnClickListener(v -> showPhotoChooser());
-        findViewById(R.id.btn_add_visit).setOnClickListener(v -> soon());
+        findViewById(R.id.btn_add_visit).setOnClickListener(v -> appointmentFlow.add(orderId));
+        findViewById(R.id.btn_book).setOnClickListener(v -> {
+            bookPrompt = false;
+            refresh();
+            appointmentFlow.add(orderId);
+        });
+        findViewById(R.id.btn_book_dismiss).setOnClickListener(v -> {
+            bookPrompt = false;
+            refresh();
+        });
         findViewById(R.id.btn_share).setOnClickListener(v -> soon());
         findViewById(R.id.btn_add_payment).setOnClickListener(v -> showEntryDialog(LedgerType.PAYMENT));
         findViewById(R.id.btn_add_expense).setOnClickListener(v -> showEntryDialog(LedgerType.EXPENSE));
@@ -117,6 +135,13 @@ public class OrderDetailActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         refresh();
+    }
+
+    @Override
+    protected void onStop() {
+        // Leaving the screen drops the prompt.
+        bookPrompt = false;
+        super.onStop();
     }
 
     @Override
@@ -176,7 +201,81 @@ public class OrderDetailActivity extends BaseActivity {
                 noNotes ? R.dimen.body_text_size : R.dimen.form_text_size));
 
         bindPhotos();
+        bindVisits();
+        findViewById(R.id.book_banner).setVisibility(bookPrompt ? View.VISIBLE : View.GONE);
         bindActions(o);
+    }
+
+    // ---- visits ----
+
+    private static final int PAST_COLLAPSED = 3;
+
+    private void bindVisits() {
+        LinearLayout box = findViewById(R.id.visits);
+        box.removeAllViews();
+        long now = System.currentTimeMillis();
+        List<Appointment> upcoming = new ArrayList<>();
+        List<Appointment> past = new ArrayList<>();
+        for (Appointment a : appointments.listForOrder(orderId)) {
+            (a.startsAt >= now ? upcoming : past).add(a);
+        }
+        if (upcoming.isEmpty() && past.isEmpty()) {
+            TextView empty = new TextView(this);
+            empty.setText(R.string.visits_empty);
+            empty.setTextColor(getColor(R.color.text_muted));
+            empty.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.body_text_size));
+            box.addView(empty);
+            return;
+        }
+        for (Appointment a : upcoming) {
+            box.addView(visitRow(a, false));
+        }
+        if (!past.isEmpty()) {
+            TextView label = new TextView(this);
+            label.setText(R.string.appt_past);
+            label.setTextColor(getColor(R.color.text_muted));
+            label.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.chip_text_size));
+            label.setTypeface(null, Typeface.BOLD);
+            label.setPadding(0, upcoming.isEmpty() ? 0 : dp(8), 0, dp(2));
+            box.addView(label);
+            int from = showPastAll ? 0 : Math.max(0, past.size() - PAST_COLLAPSED);
+            for (int i = from; i < past.size(); i++) {
+                box.addView(visitRow(past.get(i), true));
+            }
+            if (from > 0) {
+                Button more = new Button(this, null, 0, R.style.DetailTextButton);
+                more.setText(R.string.appt_show_all);
+                more.setOnClickListener(v -> {
+                    showPastAll = true;
+                    refresh();
+                });
+                box.addView(more, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                        getResources().getDimensionPixelSize(R.dimen.detail_button_height)));
+            }
+        }
+    }
+
+    private View visitRow(final Appointment a, boolean muted) {
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.VERTICAL);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setMinimumHeight(getResources().getDimensionPixelSize(R.dimen.form_touch));
+        row.setPadding(0, dp(4), 0, dp(4));
+        row.setBackgroundResource(android.R.drawable.list_selector_background);
+        TextView when = new TextView(this);
+        when.setText(Format.appointment(this, a.startsAt, LocalDate.now()));
+        when.setTextColor(getColor(muted ? R.color.text_muted : R.color.text_primary));
+        when.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.form_text_size));
+        row.addView(when);
+        if (a.note != null && !a.note.trim().isEmpty()) {
+            TextView note = new TextView(this);
+            note.setText(a.note);
+            note.setTextColor(getColor(R.color.text_muted));
+            note.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.body_text_size));
+            row.addView(note);
+        }
+        row.setOnClickListener(v -> appointmentFlow.showActions(a));
+        return row;
     }
 
     private void bindHeader(Order o) {
@@ -624,6 +723,7 @@ public class OrderDetailActivity extends BaseActivity {
         try {
             orders.moveTo(o.id, target, System.currentTimeMillis());
             Log.d(TAG, "moved #" + o.id + " " + o.stage + " -> " + target);
+            bookPrompt = target.offersVisit();
         } catch (IllegalStateException | IllegalArgumentException e) {
             // The screen was stale (moved or deleted elsewhere). Reload and show the truth.
             Log.w(TAG, "move failed for #" + o.id + ": " + e.getMessage());

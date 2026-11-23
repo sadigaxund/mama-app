@@ -155,4 +155,16 @@
     <string name="photo_viewer_desc">%1$d / %2$d</string>
     <string name="photo_thumb_desc">Фото</string>
     <string name="no_gallery_app">Приложение галереи не найдено</string>
+    <string name="appt_when">%1$s, %2$s · %3$s</string>
+    <string name="appt_past">Прошедшие</string>
+    <string name="appt_show_all">Показать все</string>
+    <string name="appt_note_title">Заметка к визиту</string>
+    <string name="appt_note_hint">Заметка (необязательно)</string>
+    <string name="appt_save">Сохранить</string>
+    <string name="appt_edit">Изменить</string>
+    <string name="appt_delete_confirm">Удалить этот визит?</string>
+    <string name="appt_book_prompt">Назначить визит?</string>
+    <string name="appt_book_action">Назначить</string>
+    <string name="appt_dismiss_desc">Закрыть</string>
+    <string name="appt_board_action">Визит</string>
 </resources>

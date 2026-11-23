@@ -156,4 +156,16 @@
     <string name="photo_viewer_desc">%1$d / %2$d</string>
     <string name="photo_thumb_desc">Photo</string>
     <string name="no_gallery_app">No gallery app found</string>
+    <string name="appt_when">%1$s, %2$s · %3$s</string>
+    <string name="appt_past">Past</string>
+    <string name="appt_show_all">Show all</string>
+    <string name="appt_note_title">Visit note</string>
+    <string name="appt_note_hint">Note (optional)</string>
+    <string name="appt_save">Save</string>
+    <string name="appt_edit">Edit</string>
+    <string name="appt_delete_confirm">Delete this visit?</string>
+    <string name="appt_book_prompt">Book a visit?</string>
+    <string name="appt_book_action">Book</string>
+    <string name="appt_dismiss_desc">Dismiss</string>
+    <string name="appt_board_action">Visit</string>
 </resources>

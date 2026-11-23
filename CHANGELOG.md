@@ -10,3 +10,4 @@
 - Search by name, phone or order number, and filter by kind or garment type.
 - Settings for language (Russian, Azerbaijani, English), currency and reminder defaults.
 - Photos from the camera or gallery on each order, shown on the card and in a full-screen viewer.
+- Visits (fittings, pickups) per order, with a prompt to book one after moving to a fitting or Done.

@@ -90,4 +90,12 @@ public class StageTest {
             assertEquals(s.toString(), s == Stage.FITTING_2, s.canMoveTo(Stage.ALTERATIONS));
         }
     }
+
+    @Test
+    public void onlyFittingsAndDoneOfferAVisit() {
+        for (Stage s : Stage.values()) {
+            boolean expected = s == Stage.FITTING_1 || s == Stage.FITTING_2 || s == Stage.DONE;
+            assertEquals(s.toString(), expected, s.offersVisit());
+        }
+    }
 }

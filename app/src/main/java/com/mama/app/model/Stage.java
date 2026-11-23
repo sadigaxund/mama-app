@@ -55,6 +55,11 @@ public enum Stage {
         return Collections.unmodifiableList(moves);
     }
 
+    /** True for the stages that offer to book a visit when an order moves into them. */
+    public boolean offersVisit() {
+        return this == FITTING_1 || this == FITTING_2 || this == DONE;
+    }
+
     public boolean canMoveTo(Stage target) {
         return target != null && allowedMoves().contains(target);
     }

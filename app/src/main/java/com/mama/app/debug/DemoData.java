@@ -91,6 +91,13 @@ public final class DemoData {
                 long at = LocalDateTime.of(today.plusDays(1), java.time.LocalTime.of(15, 0))
                         .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
                 appts.add(id, at, "Примерка");
+                // Past visits, to show the collapsed "past" list (four, so one stays hidden).
+                int[] ago = {-21, -14, -8, -3};
+                for (int d : ago) {
+                    long past = LocalDateTime.of(today.plusDays(d), java.time.LocalTime.of(10, 0))
+                            .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+                    appts.add(id, past, d == -3 ? "Снять мерки" : null);
+                }
             }
             if (i == 6) {
                 long at = LocalDateTime.of(today.plusDays(2), java.time.LocalTime.of(11, 30))

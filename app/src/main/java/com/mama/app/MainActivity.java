@@ -41,7 +41,9 @@ import com.mama.app.model.OrderFilter;
 import com.mama.app.model.OrderPhoto;
 import com.mama.app.model.Stage;
 import com.mama.app.photo.PhotoStore;
+import com.mama.app.ui.AppointmentFlow;
 import com.mama.app.ui.BaseActivity;
+import com.mama.app.ui.Format;
 import com.mama.app.ui.OrderCardAdapter;
 import com.mama.app.ui.Prefs;
 
@@ -95,6 +97,8 @@ public class MainActivity extends BaseActivity {
     private List<GarmentType> typeList = new ArrayList<>();
 
     private static final long UNDO_MILLIS = 4000;
+    private static final long UNDO_VISIT_MILLIS = 6000;
+    private AppointmentFlow appointmentFlow;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Runnable hideUndo = this::hideUndoBar;
     private View undoBar;
@@ -144,6 +148,12 @@ public class MainActivity extends BaseActivity {
         fab = findViewById(R.id.fab);
         undoBar = findViewById(R.id.undo_bar);
         findViewById(R.id.undo_action).setOnClickListener(v -> undoMove());
+        appointmentFlow = new AppointmentFlow(this, appointments, () -> refresh(false));
+        findViewById(R.id.visit_action).setOnClickListener(v -> {
+            long id = undoOrderId;
+            hideUndoBar();
+            appointmentFlow.add(id);
+        });
         fab.setOnClickListener(v ->
                 startActivityForResult(OrderFormActivity.newOrderIntent(this, stages[selected]), REQUEST_FORM));
 
@@ -419,7 +429,8 @@ public class MainActivity extends BaseActivity {
         undoOrderId = order.id;
         undoStage = order.stage;
         undoChangedAt = order.stageChangedAt;
-        showUndoBar(getString(R.string.undo_moved, order.id, getString(stageLabel(target))));
+        showUndoBar(getString(R.string.undo_moved, order.id, getString(stageLabel(target))),
+                target.offersVisit());
         refresh(false);
     }
 
@@ -438,14 +449,15 @@ public class MainActivity extends BaseActivity {
         refresh(false);
     }
 
-    private void showUndoBar(String text) {
+    private void showUndoBar(String text, boolean offerVisit) {
         ((TextView) findViewById(R.id.undo_text)).setText(text);
+        findViewById(R.id.visit_action).setVisibility(offerVisit ? View.VISIBLE : View.GONE);
         undoBar.setVisibility(View.VISIBLE);
         // Lift the FAB clear of the bar: bar height plus its margin twice.
         float margin = getResources().getDimension(R.dimen.undo_bar_margin);
         fab.setTranslationY(-(getResources().getDimension(R.dimen.undo_bar_height) + margin));
         handler.removeCallbacks(hideUndo);
-        handler.postDelayed(hideUndo, UNDO_MILLIS);
+        handler.postDelayed(hideUndo, offerVisit ? UNDO_VISIT_MILLIS : UNDO_MILLIS);
     }
 
     private void hideUndoBar() {
@@ -536,8 +548,7 @@ public class MainActivity extends BaseActivity {
         for (Order o : found) {
             String type = typeNames.get(o.garmentTypeId);
             Appointment next = appointments.nextUpcoming(o.id, now);
-            LocalDateTime when = next == null ? null
-                    : LocalDateTime.ofInstant(Instant.ofEpochMilli(next.startsAt), ZoneId.systemDefault());
+            LocalDateTime when = next == null ? null : Format.toLocal(next.startsAt);
             rows.add(new OrderCardAdapter.Row(o, type == null ? "" : type, ledger.balanceDue(o.id),
                     loadThumb(o.id), when, showStage ? getString(stageLabel(o.stage)) : null));
         }

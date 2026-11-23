@@ -163,6 +163,23 @@
             android:textSize="@dimen/undo_bar_text_size" />
 
         <TextView
+            android:id="@+id/visit_action"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="?android:attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:paddingStart="@dimen/undo_action_padding"
+            android:paddingEnd="@dimen/undo_action_padding"
+            android:singleLine="true"
+            android:text="@string/appt_board_action"
+            android:textColor="@color/undo_bar_text"
+            android:textSize="@dimen/undo_bar_text_size"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+        <TextView
             android:id="@+id/undo_action"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"

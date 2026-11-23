@@ -20,7 +20,7 @@ step lands as one commit and is checked on a device before it is ticked.
 8. [x] Search, filter, sort
 9. [x] Settings: language (RU default, AZ, EN) and currency (AZN default)
 10. [x] Photos: camera and gallery, card thumbnail, full-screen view
-11. [ ] Appointments: add, edit, delete, banner on fitting and done moves
+11. [x] Appointments: add, edit, delete, banner on fitting and done moves
 12. [ ] Reminders: morning notification group, actions, appointment alarms, reboot
 13. [ ] Share: text, image and PDF
 14. [ ] Backup: Google Cloud setup, sign-in, daily Drive folder sync, restore

@@ -348,6 +348,15 @@ public class RepositoryTest extends AndroidTestCase {
         assertEquals(10000 + 1500 - 2000, ledger.balanceDue(id));
     }
 
+    public void testAppointmentNoteClearsAndOrderDeleteCascades() {
+        long id = add("Casc", Stage.FITTING_1, 5, 1);
+        long a = appts.add(id, 4000, "with note");
+        appts.update(a, 4000, null);
+        assertNull(appts.listForOrder(id).get(0).note);
+        orders.delete(id);
+        assertTrue(appts.listForOrder(id).isEmpty());
+    }
+
     public void testAppointments() {
         long id = add("Ap", Stage.FITTING_1, 5, 1);
         long other = add("Other", Stage.FITTING_1, 5, 1);

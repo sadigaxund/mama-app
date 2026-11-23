@@ -79,4 +79,26 @@ public final class Format {
         String pattern = android.text.format.DateFormat.is24HourFormat(context) ? "HH:mm" : "h:mm a";
         return t.format(DateTimeFormatter.ofPattern(pattern, locale(context)));
     }
+
+    /** The one conversion from a local date and time to the stored instant. */
+    public static long toMillis(java.time.LocalDateTime local) {
+        return local.atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli();
+    }
+
+    /** The one conversion from a stored instant to local date and time. */
+    public static java.time.LocalDateTime toLocal(long millis) {
+        return java.time.LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(millis),
+                java.time.ZoneId.systemDefault());
+    }
+
+    /** "Чт, 28 ноя · 15:00", with the year added when it differs from today's. */
+    public static String appointment(Context context, long startsAt, LocalDate today) {
+        java.time.LocalDateTime t = toLocal(startsAt);
+        Locale locale = locale(context);
+        String pattern = t.getYear() == today.getYear() ? "d MMM" : "d MMM yyyy";
+        return context.getString(com.mama.app.R.string.appt_when,
+                weekday(t.getDayOfWeek(), locale),
+                t.format(DateTimeFormatter.ofPattern(pattern, locale)),
+                time(t.toLocalTime()));
+    }
 }
