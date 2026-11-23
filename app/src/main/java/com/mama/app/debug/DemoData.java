@@ -86,6 +86,12 @@ public final class DemoData {
             if (i == 6) {
                 ledger.add(id, LedgerType.EXPENSE, 1200, "Пуговицы", nowMillis);
             }
+            if (i == 0) {
+                // A visit today at 15:00, for the morning notification.
+                long at = LocalDateTime.of(today, java.time.LocalTime.of(15, 0))
+                        .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+                appts.add(id, at, "Подогнать по росту");
+            }
             if (i == 4) {
                 // An upcoming visit: tomorrow at 15:00.
                 long at = LocalDateTime.of(today.plusDays(1), java.time.LocalTime.of(15, 0))

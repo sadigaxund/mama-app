@@ -168,4 +168,39 @@
     <string name="appt_book_action">Book</string>
     <string name="appt_dismiss_desc">Dismiss</string>
     <string name="appt_board_action">Visit</string>
+    <string name="channel_morning">Morning summary</string>
+    <string name="channel_appointments">Visits</string>
+    <string name="notif_today_title">Mama App · today</string>
+    <string name="notif_overdue">⚠ %1$s · %2$s · overdue %3$s</string>
+    <string name="notif_due_today">%1$s · %2$s · due today</string>
+    <string name="notif_due_in">%1$s · %2$s · due in %3$s</string>
+    <string name="notif_order_text">%1$s · deadline %2$s</string>
+    <string name="notif_move_deadline">Move deadline</string>
+    <string name="notif_stop">Stop reminding</string>
+    <string name="notif_call">Call</string>
+    <string name="notif_visit_text">%1$s · %2$s · %3$s</string>
+    <string name="notif_visit_15m">In 15 minutes: %1$s</string>
+    <string name="notif_visit_30m">In 30 minutes: %1$s</string>
+    <string name="notif_visit_1h">In 1 hour: %1$s</string>
+    <string name="notif_visit_2h">In 2 hours: %1$s</string>
+    <string name="notif_visit_1d">Tomorrow: %1$s</string>
+    <string name="notif_blocked_title">Notifications are off</string>
+    <string name="notif_blocked_sub">Reminders cannot be shown</string>
+    <string name="notif_blocked_action">Open</string>
+    <plurals name="morning_visits">
+        <item quantity="one">%1$d visit: %2$s</item>
+        <item quantity="other">%1$d visits: %2$s</item>
+    </plurals>
+    <plurals name="morning_today">
+        <item quantity="one">%1$d due today: %2$s</item>
+        <item quantity="other">%1$d due today: %2$s</item>
+    </plurals>
+    <plurals name="morning_overdue">
+        <item quantity="one">%1$d overdue: %2$s</item>
+        <item quantity="other">%1$d overdue: %2$s</item>
+    </plurals>
+    <plurals name="morning_soon">
+        <item quantity="one">%1$d due soon: %2$s</item>
+        <item quantity="other">%1$d due soon: %2$s</item>
+    </plurals>
 </resources>

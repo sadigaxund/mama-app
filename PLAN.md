@@ -21,13 +21,16 @@ step lands as one commit and is checked on a device before it is ticked.
 9. [x] Settings: language (RU default, AZ, EN) and currency (AZN default)
 10. [x] Photos: camera and gallery, card thumbnail, full-screen view
 11. [x] Appointments: add, edit, delete, banner on fitting and done moves
-12. [ ] Reminders: morning notification group, actions, appointment alarms, reboot
+12. [x] Reminders: morning notification group, actions, appointment alarms, reboot
 13. [ ] Share: text, image and PDF
 14. [ ] Backup: Google Cloud setup, sign-in, daily Drive folder sync, restore
 15. [ ] Check every step on the physical phone. Items Waydroid could not prove:
     - Picking a contact fills the phone, and the name only when empty.
     - The call button opens the dialer with the number.
     - Taking a photo with the camera adds it to the order, upright.
+    - The morning notification arrives at its set time, and after a reboot.
+    - A visit reminder pops up with sound, and its call button opens the dialer.
+    - The notification permission prompt appears once, after the first order.
 
 ## Possible features
 

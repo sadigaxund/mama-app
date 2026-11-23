@@ -103,6 +103,37 @@
             android:text="@string/section_reminders" />
 
         <LinearLayout
+            android:id="@+id/row_notif_blocked"
+            style="@style/SettingsRow"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/SettingsRowTitle"
+                    android:text="@string/notif_blocked_title"
+                    android:textColor="@color/error" />
+
+                <TextView
+                    style="@style/SettingsRowSub"
+                    android:text="@string/notif_blocked_sub" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="@dimen/form_gap"
+                android:text="@string/notif_blocked_action"
+                android:textColor="@color/accent"
+                android:textSize="@dimen/form_text_size"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/row_morning"
             style="@style/SettingsRow">
 

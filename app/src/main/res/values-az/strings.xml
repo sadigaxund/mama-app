@@ -165,4 +165,39 @@
     <string name="appt_book_action">Təyin et</string>
     <string name="appt_dismiss_desc">Bağla</string>
     <string name="appt_board_action">Görüş</string>
+    <string name="channel_morning">Səhər xülasəsi</string>
+    <string name="channel_appointments">Görüşlər</string>
+    <string name="notif_today_title">Mama App · bu gün</string>
+    <string name="notif_overdue">⚠ %1$s · %2$s · %3$s gecikib</string>
+    <string name="notif_due_today">%1$s · %2$s · son tarix bu gündür</string>
+    <string name="notif_due_in">%1$s · %2$s · son tarixə %3$s qalıb</string>
+    <string name="notif_order_text">%1$s · son tarix %2$s</string>
+    <string name="notif_move_deadline">Son tarixi dəyiş</string>
+    <string name="notif_stop">Xatırlatma</string>
+    <string name="notif_call">Zəng et</string>
+    <string name="notif_visit_text">%1$s · %2$s · %3$s</string>
+    <string name="notif_visit_15m">15 dəqiqəyə: %1$s</string>
+    <string name="notif_visit_30m">30 dəqiqəyə: %1$s</string>
+    <string name="notif_visit_1h">1 saata: %1$s</string>
+    <string name="notif_visit_2h">2 saata: %1$s</string>
+    <string name="notif_visit_1d">Sabah: %1$s</string>
+    <string name="notif_blocked_title">Bildirişlər söndürülüb</string>
+    <string name="notif_blocked_sub">Xatırlatmalar göstərilə bilməz</string>
+    <string name="notif_blocked_action">Aç</string>
+    <plurals name="morning_visits">
+        <item quantity="one">%1$d görüş: %2$s</item>
+        <item quantity="other">%1$d görüş: %2$s</item>
+    </plurals>
+    <plurals name="morning_today">
+        <item quantity="one">%1$d son tarix bu gün: %2$s</item>
+        <item quantity="other">%1$d son tarix bu gün: %2$s</item>
+    </plurals>
+    <plurals name="morning_overdue">
+        <item quantity="one">%1$d gecikib: %2$s</item>
+        <item quantity="other">%1$d gecikib: %2$s</item>
+    </plurals>
+    <plurals name="morning_soon">
+        <item quantity="one">%1$d tezliklə son tarix: %2$s</item>
+        <item quantity="other">%1$d tezliklə son tarix: %2$s</item>
+    </plurals>
 </resources>

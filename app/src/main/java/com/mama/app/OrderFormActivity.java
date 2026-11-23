@@ -46,6 +46,7 @@ import com.mama.app.model.ReminderDays;
 import com.mama.app.model.ReminderMode;
 import com.mama.app.ui.ReminderDaysEditor;
 import com.mama.app.model.Stage;
+import com.mama.app.reminders.Notifications;
 import com.mama.app.ui.BaseActivity;
 import com.mama.app.ui.Format;
 import com.mama.app.ui.Intents;
@@ -60,6 +61,8 @@ public class OrderFormActivity extends BaseActivity {
     private static final String TAG = "MamaApp";
     public static final String EXTRA_STAGE = "stage";
     public static final String EXTRA_ORDER_ID = "order_id";
+    /** Boolean: open the deadline date picker as soon as the form shows. */
+    public static final String EXTRA_PICK_DEADLINE = "pick_deadline";
 
     private static final String STATE_DATE = "date";
     private static final String STATE_KIND = "kind";
@@ -201,6 +204,11 @@ public class OrderFormActivity extends BaseActivity {
         clearOnChange(fCustomer, R.id.e_customer);
         clearOnChange(fPrice, R.id.e_price);
         clearOnChange(fDeposit, R.id.e_deposit);
+
+        if (savedInstanceState == null && editing != null
+                && getIntent().getBooleanExtra(EXTRA_PICK_DEADLINE, false)) {
+            showDatePicker();
+        }
     }
 
     private void populate(Order o) {
@@ -682,6 +690,8 @@ public class OrderFormActivity extends BaseActivity {
             } else {
                 orders.setReminderMode(id, remMode);
             }
+            // The deadline may have moved, so the morning notification of this order is out of date.
+            Notifications.cancelOrder(this, id);
             setResult(RESULT_OK, new Intent().putExtra(EXTRA_STAGE, stage.name()));
             finish();
         } catch (RuntimeException e) {

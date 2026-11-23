@@ -381,6 +381,16 @@ public class RepositoryTest extends AndroidTestCase {
         assertEquals(first, appts.nextUpcoming(id, 2000).id);
     }
 
+    public void testAppointmentGet() {
+        long id = add("Get", Stage.ACCEPTED, 5, 1);
+        long a = appts.add(id, 5000, "n");
+        assertEquals(5000, appts.get(a).startsAt);
+        assertEquals("n", appts.get(a).note);
+        assertNull(appts.get(a + 99));
+        appts.delete(a);
+        assertNull(appts.get(a));
+    }
+
     public void testPhotos() {
         long id = add("Ph", Stage.ACCEPTED, 5, 1);
         assertNull(photos.newest(id));

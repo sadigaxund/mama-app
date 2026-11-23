@@ -41,6 +41,10 @@ import com.mama.app.model.OrderFilter;
 import com.mama.app.model.OrderPhoto;
 import com.mama.app.model.Stage;
 import com.mama.app.photo.PhotoStore;
+import com.mama.app.reminders.AppointmentNotifier;
+import com.mama.app.reminders.MorningNotifier;
+import com.mama.app.reminders.Notifications;
+import com.mama.app.ui.NotificationPermission;
 import com.mama.app.ui.AppointmentFlow;
 import com.mama.app.ui.BaseActivity;
 import com.mama.app.ui.Format;
@@ -63,6 +67,8 @@ public class MainActivity extends BaseActivity {
     private static final String STATE_STAGE = "stage";
     private static final int REQUEST_FORM = 1;
     private static final String EXTRA_SEED_DEMO = "seed_demo";
+    private static final String EXTRA_DEBUG_MORNING = "debug_morning";
+    private static final String EXTRA_DEBUG_APPOINTMENT = "debug_appointment";
 
     private DbHelper db;
     private OrderRepository orders;
@@ -127,6 +133,11 @@ public class MainActivity extends BaseActivity {
             }
         }
 
+        Notifications.createChannels(this);
+        if (debuggable && savedInstanceState == null) {
+            runDebugReminders(getIntent());
+        }
+
         if (savedInstanceState != null) {
             selected = savedInstanceState.getInt(STATE_STAGE, 0);
         }
@@ -176,6 +187,28 @@ public class MainActivity extends BaseActivity {
         });
     }
 
+    /** Debug builds only: post the morning group or one appointment reminder right now. */
+    private void runDebugReminders(Intent intent) {
+        final boolean morning = intent.getBooleanExtra(EXTRA_DEBUG_MORNING, false);
+        final long appointmentId = intent.getLongExtra(EXTRA_DEBUG_APPOINTMENT, 0);
+        if (!morning && appointmentId == 0) {
+            return;
+        }
+        new Thread(() -> {
+            try {
+                if (morning) {
+                    MorningNotifier.post(getApplicationContext());
+                }
+                if (appointmentId != 0) {
+                    AppointmentNotifier.post(getApplicationContext(), appointmentId);
+                }
+            } catch (RuntimeException e) {
+                // A debug aid: report the failure in the log and keep the app running.
+                Log.e(TAG, "debug reminder failed", e);
+            }
+        }, "debug-reminder").start();
+    }
+
     private void showMenu(View anchor) {
         PopupMenu menu = new PopupMenu(this, anchor);
         menu.getMenu().add(0, R.string.menu_settings, 0, R.string.menu_settings);
@@ -187,6 +220,15 @@ public class MainActivity extends BaseActivity {
             return false;
         });
         menu.show();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        if ((getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+            runDebugReminders(intent);
+        }
     }
 
     @Override
@@ -206,6 +248,7 @@ public class MainActivity extends BaseActivity {
                     selected = i;
                 }
             }
+            NotificationPermission.requestOnce(this);
         }
     }
 
@@ -487,7 +530,7 @@ public class MainActivity extends BaseActivity {
         refresh(true);
     }
 
-    static int stageLabel(Stage s) {
+    public static int stageLabel(Stage s) {
         switch (s) {
             case ACCEPTED: return R.string.stage_accepted;
             case CUTTING: return R.string.stage_cutting;

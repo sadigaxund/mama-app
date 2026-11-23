@@ -48,6 +48,8 @@ import com.mama.app.model.OrderPhoto;
 import com.mama.app.model.Stage;
 import com.mama.app.photo.AppFileProvider;
 import com.mama.app.photo.PhotoStore;
+import com.mama.app.reminders.Notifications;
+import com.mama.app.reminders.Reminders;
 import com.mama.app.ui.AppointmentFlow;
 import com.mama.app.ui.BaseActivity;
 import com.mama.app.ui.Format;
@@ -480,7 +482,14 @@ public class OrderDetailActivity extends BaseActivity {
     private void deleteOrder() {
         // The rows go with the order, so the file names are read first.
         List<OrderPhoto> rows = photos.listForOrder(orderId);
+        // SQLite cascades the appointments without telling the listener, so their alarms are
+        // cancelled here, with the ids read before the delete.
+        List<Appointment> visits = appointments.listForOrder(orderId);
         orders.delete(orderId);
+        for (Appointment a : visits) {
+            Reminders.appointmentListener().onDeleted(a.id);
+        }
+        Notifications.cancelOrder(this, orderId);
         for (OrderPhoto p : rows) {
             photoStore.delete(p.fileName);
         }

@@ -8,9 +8,10 @@ The package root is `com.mama.app`.
 
 | Package | Holds | Android imports |
 |---|---|---|
-| `model` | enums, value classes, `Money`, `ReminderDays` | none |
+| `model` | enums, value classes, `Money`, `ReminderDays`, `ReminderPlanner` | none |
 | `data` | `DbHelper` and one repository per aggregate | `android.database`, `android.content` |
 | `ui` | `BaseActivity`, `LocaleSupport`, `Format`, `Prefs`, `Intents`, `OrderCardAdapter`, `ReminderDaysEditor` | `android.*` |
+| `reminders` | alarms, receivers and notification builders | `android.*` |
 | `photo` | `PhotoStore` (import, thumbnails, delete), `AppFileProvider` | `android.*` |
 | `debug` | `DemoData`, demo orders for visual checks | `android.*` through the `data` package |
 
@@ -29,13 +30,25 @@ Activities such as `MainActivity` sit in the package root. Services get their ow
 ## UI
 
 - Every Activity extends `BaseActivity`. It wraps its base context with `LocaleSupport.wrap`, which reads `language` ("ru", "az" or "en", default "ru") from the SharedPreferences file `settings`.
-- `Prefs` holds the name of the SharedPreferences file `settings`, its keys (`language`, `currency`, `reminder_days`, `morning_on`, `morning_minutes`, `visit_lead_minutes`) and their defaults. No other class writes those literals.
+- `Prefs` holds the name of the SharedPreferences file `settings`, its keys (`language`, `currency`, `reminder_days`, `morning_on`, `morning_minutes`, `visit_lead_minutes`, `notifications_asked`) and their defaults. No other class writes those literals.
 - `SettingsActivity` holds language, currency and reminder defaults. A language change restarts the task from `MainActivity`. `ReminderDaysEditor` is the days list shared with the order form's reminders dialog.
 - `OrderFormActivity` creates and edits orders. `newOrderIntent` and `editIntent` build its intents. It returns `RESULT_OK` with the saved order's stage, and the board shows that stage's tab.
 - `Format` holds money, date and weekday text. The currency symbol comes from the `currency` preference, default AZN. AZN, RUB, TRY, USD, EUR and GBP use fixed symbols, because Android prints the bare code for some of them in some languages.
 - `Intents` builds the contacts picker intent (`pickPhoneContact`) and the dialer intent (`dial`). Callers catch `ActivityNotFoundException` and show a Toast. The manifest `<queries>` block lists both intents for Android 11 package visibility. The app holds no contacts or phone permission.
 - `OrderCardAdapter` is a `BaseAdapter` over fully loaded `Row` objects. `MainActivity` loads the rows, so `getView` never queries the database.
 - The board loads in `onResume`. A swipe on the list area is read in `MainActivity.dispatchTouchEvent` with a `GestureDetector`.
+
+## Reminders
+
+`ReminderPlanner` (in `model`) decides which deadline items an order gets on a day. `MamaApp` runs at every process start: it creates both notification channels, installs `AppointmentScheduler` into `Reminders`, and sets the morning alarm and the visit alarms.
+
+`MorningScheduler` keeps one `setWindow` alarm for the next morning time. `MorningReceiver` calls `MorningNotifier` on a background thread, then sets the next day's alarm. `MorningNotifier` posts one summary and one notification per due order. Notification ids are `Notifications.orderId(order)`. The buttons go to `ReminderActionReceiver`, which moves the order to `DONE` or sets its mode to `OFF`.
+
+`AppointmentScheduler` sets one alarm per future appointment, with the appointment id as the request code. `AppointmentReceiver` calls `AppointmentNotifier`. `BootReceiver` sets every alarm again after boot, a time or zone change, and an app update.
+
+SQLite deletes appointments with their order without calling `AppointmentListener`. `OrderDetailActivity` reads the appointment ids before the delete and cancels each alarm.
+
+A debuggable build runs the posts on demand: the `MainActivity` extras `debug_morning` (boolean) and `debug_appointment` (appointment id, long).
 
 ## Photos
 

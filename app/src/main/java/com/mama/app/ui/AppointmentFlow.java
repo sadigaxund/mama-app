@@ -91,6 +91,9 @@ public final class AppointmentFlow {
 
     private void notifySaved(Appointment a) {
         Reminders.appointmentListener().onSaved(a);
+        if (context instanceof android.app.Activity) {
+            NotificationPermission.requestOnce((android.app.Activity) context);
+        }
         changed.onChanged();
     }
 

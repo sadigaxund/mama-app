@@ -17,6 +17,9 @@ import android.widget.TextView;
 import com.mama.app.model.ReminderDays;
 import com.mama.app.ui.BaseActivity;
 import com.mama.app.ui.Format;
+import com.mama.app.reminders.AppointmentScheduler;
+import com.mama.app.reminders.MorningScheduler;
+import com.mama.app.ui.NotificationPermission;
 import com.mama.app.ui.Prefs;
 import com.mama.app.ui.ReminderDaysEditor;
 
@@ -58,11 +61,26 @@ public class SettingsActivity extends BaseActivity {
         findViewById(R.id.row_morning).setOnClickListener(v -> {
             boolean on = !Prefs.morningOn(this);
             Prefs.get(this).edit().putBoolean(Prefs.KEY_MORNING_ON, on).apply();
+            MorningScheduler.schedule(this);
             refresh();
         });
         rowTime.setOnClickListener(v -> chooseMorningTime());
         findViewById(R.id.row_days).setOnClickListener(v -> editReminderDays());
         findViewById(R.id.row_visit).setOnClickListener(v -> chooseVisitLead());
+        findViewById(R.id.row_notif_blocked).setOnClickListener(v -> {
+            try {
+                startActivity(NotificationPermission.settingsIntent(this));
+            } catch (android.content.ActivityNotFoundException e) {
+                android.util.Log.w("MamaApp", "no notification settings page", e);
+            }
+        });
+        refresh();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // The user may have come back from the system page.
         refresh();
     }
 
@@ -103,6 +121,9 @@ public class SettingsActivity extends BaseActivity {
         sub(R.id.row_lang).setText(languageName(languageCode()));
         String cur = Prefs.currency(this);
         sub(R.id.row_cur).setText(cur + " (" + Format.currencySymbol(this, cur) + ")");
+
+        boolean blocked = !getSystemService(android.app.NotificationManager.class).areNotificationsEnabled();
+        findViewById(R.id.row_notif_blocked).setVisibility(blocked ? View.VISIBLE : View.GONE);
 
         boolean on = Prefs.morningOn(this);
         morningSwitch.setChecked(on);
@@ -262,6 +283,7 @@ public class SettingsActivity extends BaseActivity {
         int m = Prefs.morningMinutes(this);
         new TimePickerDialog(this, (view, hour, minute) -> {
             Prefs.get(this).edit().putInt(Prefs.KEY_MORNING_MINUTES, hour * 60 + minute).apply();
+            MorningScheduler.schedule(this);
             refresh();
         }, m / 60, m % 60, android.text.format.DateFormat.is24HourFormat(this)).show();
     }
@@ -311,6 +333,9 @@ public class SettingsActivity extends BaseActivity {
                 .setTitle(R.string.visit_title)
                 .setSingleChoiceItems(labels, checked, (d, which) -> {
                     Prefs.get(this).edit().putInt(Prefs.KEY_VISIT_LEAD_MINUTES, VISIT_MINUTES[which]).apply();
+                    // The alarms read the lead from Prefs when set, so every future visit is set again.
+                    new Thread(() -> AppointmentScheduler.rescheduleAll(getApplicationContext()),
+                            "reschedule").start();
                     refresh();
                     d.dismiss();
                 })

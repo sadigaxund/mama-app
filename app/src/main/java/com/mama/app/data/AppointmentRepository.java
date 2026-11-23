@@ -38,6 +38,12 @@ public class AppointmentRepository {
         helper.getWritableDatabase().delete("appointment", "id = ?", new String[]{Long.toString(id)});
     }
 
+    /** Returns the appointment, or null when the id does not exist. */
+    public Appointment get(long id) {
+        List<Appointment> r = query("id = ?", new String[]{Long.toString(id)}, "1");
+        return r.isEmpty() ? null : r.get(0);
+    }
+
     /** Earliest first. */
     public List<Appointment> listForOrder(long orderId) {
         return query("order_id = ?", new String[]{Long.toString(orderId)}, null);

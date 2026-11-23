@@ -26,9 +26,15 @@ public final class Prefs {
     /** Morning notification time, minutes after midnight. */
     public static final String KEY_MORNING_MINUTES = "morning_minutes";
     public static final int DEFAULT_MORNING_MINUTES = 9 * 60;
+    /** Date of the last morning post, as days since 1970-01-01. Absent when none. */
+    public static final String KEY_MORNING_LAST_POSTED = "morning_last_posted";
+
     /** Visit reminder lead time in minutes, 0 for off. */
     public static final String KEY_VISIT_LEAD_MINUTES = "visit_lead_minutes";
     public static final int DEFAULT_VISIT_LEAD_MINUTES = 60;
+
+    /** True once the notification permission dialog has been shown. */
+    public static final String KEY_NOTIFICATIONS_ASKED = "notifications_asked";
 
     /** Board filter: kind name, absent for any kind. */
     public static final String KEY_FILTER_KIND = "filter_kind";
@@ -90,6 +96,21 @@ public final class Prefs {
     public static int morningMinutes(Context context) {
         int m = get(context).getInt(KEY_MORNING_MINUTES, DEFAULT_MORNING_MINUTES);
         return m < 0 || m > 24 * 60 - 1 ? DEFAULT_MORNING_MINUTES : m;
+    }
+
+    /** The date of the last morning post, or null. */
+    public static java.time.LocalDate morningLastPosted(Context context) {
+        SharedPreferences p = get(context);
+        return p.contains(KEY_MORNING_LAST_POSTED)
+                ? java.time.LocalDate.ofEpochDay(p.getLong(KEY_MORNING_LAST_POSTED, 0)) : null;
+    }
+
+    public static void setMorningLastPosted(Context context, java.time.LocalDate date) {
+        if (date == null) {
+            get(context).edit().remove(KEY_MORNING_LAST_POSTED).commit();
+        } else {
+            get(context).edit().putLong(KEY_MORNING_LAST_POSTED, date.toEpochDay()).commit();
+        }
     }
 
     /** Minutes before a visit to remind, 0 for off. */
