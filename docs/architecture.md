@@ -10,8 +10,10 @@ The package root is `com.mama.app`.
 |---|---|---|
 | `model` | enums, value classes, `Money` | none |
 | `data` | `DbHelper` and one repository per aggregate | `android.database`, `android.content` |
+| `ui` | `BaseActivity`, `LocaleSupport`, `Format`, `OrderCardAdapter` | `android.*` |
+| `debug` | `DemoData`, demo orders for visual checks | `android.*` through the `data` package |
 
-Screens and services get their own packages in later steps. They call repositories and never write SQL.
+Activities such as `MainActivity` sit in the package root. Services get their own packages in later steps. They call repositories and never write SQL.
 
 ## Rules
 
@@ -22,6 +24,17 @@ Screens and services get their own packages in later steps. They call repositori
 - A repository validates its input and throws `IllegalArgumentException` with the reason.
 - Moving an order to a stage `Stage.canMoveTo` forbids throws `IllegalStateException`.
 - Money is a `long` in minor units. A deadline is a `LocalDate`, stored as days since 1970-01-01.
+
+## UI
+
+- Every Activity extends `BaseActivity`. It wraps its base context with `LocaleSupport.wrap`, which reads `language` ("ru", "az" or "en", default "ru") from the SharedPreferences file `settings`.
+- `Format` holds money, date and weekday text. The currency symbol comes from the `currency` preference, default AZN, and AZN always prints as the manat sign because Android prints the code.
+- `OrderCardAdapter` is a `BaseAdapter` over fully loaded `Row` objects. `MainActivity` loads the rows, so `getView` never queries the database.
+- The board loads in `onResume`. A swipe on the list area is read in `MainActivity.dispatchTouchEvent` with a `GestureDetector`.
+
+## Debug package
+
+`com.mama.app.debug` holds code that only runs in a debuggable build. A caller checks `FLAG_DEBUGGABLE` first. `MainActivity` calls `DemoData.seedIfEmpty` when the launch intent carries the boolean extra `seed_demo`, and only while the orders table is empty. Nothing outside `MainActivity` imports the package.
 
 ## Database
 

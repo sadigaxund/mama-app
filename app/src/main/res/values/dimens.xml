@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="title_bar_height">56dp</dimen>
+    <dimen name="title_bar_padding_start">16dp</dimen>
+    <dimen name="title_text_size">20sp</dimen>
+    <dimen name="tab_min_height">48dp</dimen>
+    <dimen name="tab_padding_horizontal">16dp</dimen>
+    <dimen name="tab_underline_height">3dp</dimen>
+    <dimen name="tab_text_size">15sp</dimen>
+    <dimen name="list_padding_top">4dp</dimen>
+    <dimen name="list_padding_bottom">88dp</dimen>
+    <dimen name="card_margin_side">12dp</dimen>
+    <dimen name="card_margin_vertical">4dp</dimen>
+    <dimen name="card_radius">12dp</dimen>
+    <dimen name="card_stripe_width">4dp</dimen>
+    <dimen name="card_padding">12dp</dimen>
+    <dimen name="card_padding_start">16dp</dimen>
+    <dimen name="card_padding_end">8dp</dimen>
+    <dimen name="photo_slot_size">56dp</dimen>
+    <dimen name="photo_slot_radius">8dp</dimen>
+    <dimen name="photo_placeholder_text_size">24sp</dimen>
+    <dimen name="text_gap">12dp</dimen>
+    <dimen name="name_text_size">16sp</dimen>
+    <dimen name="body_text_size">14sp</dimen>
+    <dimen name="chip_text_size">12sp</dimen>
+    <dimen name="chip_padding_horizontal">8dp</dimen>
+    <dimen name="chip_padding_vertical">2dp</dimen>
+    <dimen name="chip_radius">10dp</dimen>
+    <dimen name="chip_margin_start">6dp</dimen>
+    <dimen name="arrow_target">48dp</dimen>
+    <dimen name="fab_size">56dp</dimen>
+    <dimen name="fab_elevation">6dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="fab_text_size">32sp</dimen>
+    <dimen name="empty_text_size">16sp</dimen>
+    <dimen name="swipe_min_distance">64dp</dimen>
+</resources>

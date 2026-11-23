@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Mama App</string>
+    <string name="board_title">Sifarişlər</string>
+    <string name="board_empty">Sifariş yoxdur</string>
+    <string name="coming_soon">Tezliklə</string>
+    <string name="add_order_desc">Yeni sifariş</string>
+    <string name="move_next_desc">Növbəti mərhələyə keç</string>
+    <string name="stage_accepted">Qəbul edildi</string>
+    <string name="stage_cutting">Biçim</string>
+    <string name="stage_fitting_1">Ölçü 1</string>
+    <string name="stage_fitting_2">Ölçü 2</string>
+    <string name="stage_alterations">Son düzəliş</string>
+    <string name="stage_done">Hazır</string>
+    <string name="tab_label">%1$s %2$d</string>
+    <string name="order_number">#%1$d</string>
+    <string name="card_line2_due">%1$s · son tarix %2$s</string>
+    <string name="card_line2_overdue">%1$s ·</string>
+    <string name="card_overdue">⚠ gecikir</string>
+    <string name="card_balance">Qalıq %1$s</string>
+    <string name="card_appointment">📅 %1$s %2$s</string>
+    <string name="placeholder_letter">?</string>
+</resources>

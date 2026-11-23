@@ -134,8 +134,8 @@ your own work, so the restore has something to restore to.
 The repository is `sadigaxund/mama-app`. The default branch is `main`.
 
 - Commit format is `type(scope): message`, where type is one of `feat`,
-  `fix`, `chore`, `docs`, `refactor`, `test`, `release`. The body has three
-  lines at most.
+  `fix`, `chore`, `docs`, `refactor`, `test`, `release`. One concrete
+  subject line and no body.
 - Stage files by explicit path. Never `git add -A` or `git add -u`. Read
   `git status` and `git diff --staged` before every commit.
 - Never `--amend`, never force-push, never an empty commit, never rewrite

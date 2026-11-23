@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:minHeight="@dimen/tab_min_height"
+    android:orientation="vertical"
+    android:background="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true">
+
+    <TextView
+        android:id="@+id/tab_text"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:minHeight="@dimen/tab_min_height"
+        android:paddingStart="@dimen/tab_padding_horizontal"
+        android:paddingEnd="@dimen/tab_padding_horizontal"
+        android:singleLine="true"
+        android:textColor="@color/text_primary"
+        android:textSize="@dimen/tab_text_size" />
+
+    <View
+        android:id="@+id/tab_underline"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/tab_underline_height"
+        android:background="@color/accent"
+        android:visibility="invisible" />
+</LinearLayout>
