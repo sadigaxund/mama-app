@@ -215,6 +215,11 @@ nothing else. Google rates it non-sensitive, so the app needs no Google
 verification. The OAuth consent screen must be set to production, because a
 testing-mode grant expires after 7 days.
 
+Backup needs two install-time permissions. `INTERNET` lets the app reach the
+Drive API. `ACCESS_NETWORK_STATE` lets the daily job wait for an unmetered
+network, which Android 14 and newer require for any job with a network
+condition. Neither shows a prompt.
+
 ### Drive layout
 
 ```
