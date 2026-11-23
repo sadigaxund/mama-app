@@ -32,6 +32,11 @@ import java.util.List;
 
 /** Demo orders for visual checks. Only MainActivity calls it, and only in a debuggable build. */
 public final class DemoData {
+    private static final String DEMO_NOTES = "Рост 172, грудь 96, талия 78, бёдра 102.\n"
+            + "Длина рукава 61 см, плечо 12 см. Подкладка шёлковая, цвет графит. "
+            + "Клиентка просила чуть приталить и убрать лишнюю ширину в боках.\n"
+            + "Примерка в четверг после обеда.";
+
     private DemoData() {}
 
     /** Inserts about ten orders when the orders table is empty. Returns true when it inserted. */
@@ -69,7 +74,7 @@ public final class DemoData {
             Kind kind = i % 3 == 1 || i == 5 || i == 7 ? Kind.REPAIR : Kind.TAILORING;
             GarmentType type = all.get(i % all.size());
             Order o = new Order(0, names[i][0], i % 2 == 0 ? "+994501234567" : null, kind, type.id,
-                    prices[i], today.plusDays(dayOffsets[i]), null, stages[i],
+                    prices[i], today.plusDays(dayOffsets[i]), i == 3 ? DEMO_NOTES : null, stages[i],
                     nowMillis, nowMillis, ReminderMode.DEFAULT);
             long id = orders.insert(o, deposits[i], nowMillis + i);
             if (i == 0) {
@@ -82,6 +87,11 @@ public final class DemoData {
             }
             if (i == 3) {
                 ledger.add(id, LedgerType.EXPENSE, 7500, "Ткань", nowMillis);
+                // A long ledger and long notes, so the share PDF runs to a second page.
+                for (int k = 0; k < 40; k++) {
+                    ledger.add(id, k % 3 == 0 ? LedgerType.EXPENSE : LedgerType.PAYMENT, 500 + k * 10,
+                            "Запись " + (k + 1), nowMillis + 10 + k);
+                }
             }
             if (i == 6) {
                 ledger.add(id, LedgerType.EXPENSE, 1200, "Пуговицы", nowMillis);

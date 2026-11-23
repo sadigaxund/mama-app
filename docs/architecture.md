@@ -13,6 +13,7 @@ The package root is `com.mama.app`.
 | `ui` | `BaseActivity`, `LocaleSupport`, `Format`, `Prefs`, `Intents`, `OrderCardAdapter`, `ReminderDaysEditor` | `android.*` |
 | `reminders` | alarms, receivers and notification builders | `android.*` |
 | `photo` | `PhotoStore` (import, thumbnails, delete), `AppFileProvider` | `android.*` |
+| `share` | `OrderSummary` (pure data and text), `OrderSummaryRenderer` (Canvas drawing), `OrderSharer` (files and intents) | `OrderSummary`: none; others `android.*` |
 | `debug` | `DemoData`, demo orders for visual checks | `android.*` through the `data` package |
 
 Activities such as `MainActivity` sit in the package root. Services get their own packages in later steps. They call repositories and never write SQL.
@@ -55,6 +56,14 @@ A debuggable build runs the posts on demand: the `MainActivity` extras `debug_mo
 `PhotoStore` keeps photos in `filesDir/photos` as `<orderId>-<epochMillis>.jpg`. Import shrinks the long edge to 2048 px, applies the EXIF orientation and saves JPEG quality 85, on a single background thread. The same job adds the `order_photo` rows. Thumbnails share one `LruCache`.
 
 `AppFileProvider` (authority `<applicationId>.files`, not exported) serves files under `cacheDir/shared` and `cacheDir/camera`. It refuses any path whose canonical form leaves those folders. The camera app writes its picture into `cacheDir/camera` through it. No camera permission is declared.
+
+## Sharing
+
+`OrderSummary` holds the localized lines of one order: header, customer, stage, deadline, money rows, notes and date. The caller passes the words and formatters in `OrderSummary.Labels`, so the class has no Android import. `toText()` gives the text form.
+
+`OrderSummaryRenderer` lays the summary out as rows at a given width, drawn for 1080 px. `draw` paints all rows for the PNG. `paginate` and `drawPage` split the rows into pages for the PDF, so a page break falls between rows. Notes are split into one row per text line.
+
+`OrderSharer` writes `cacheDir/shared/order-<id>.png` and `.pdf` (A4, 595x842 pt, scaled to the page width) and builds the chooser intents. It deletes files in that folder older than one day. A debuggable build also copies each file to `getExternalFilesDir(null)/share-debug/`. `OrderDetailActivity` loads the summary on the UI thread and renders on a single worker thread.
 
 ## Debug package
 

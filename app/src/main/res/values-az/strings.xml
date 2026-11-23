@@ -200,4 +200,17 @@
         <item quantity="one">%1$d tezliklə son tarix: %2$s</item>
         <item quantity="other">%1$d tezliklə son tarix: %2$s</item>
     </plurals>
+    <string name="share_header">Sifariş #%1$d</string>
+    <string name="share_customer">Müştəri: %1$s</string>
+    <string name="share_phone">Telefon: %1$s</string>
+    <string name="share_stage">Mərhələ: %1$s</string>
+    <string name="share_next_visit">Növbəti görüş: %1$s</string>
+    <string name="share_overpaid">Artıq ödəniş</string>
+    <string name="share_date">Tarix: %1$s</string>
+    <string name="share_text">Mətn</string>
+    <string name="share_image">Şəkil</string>
+    <string name="share_pdf">PDF</string>
+    <string name="share_preparing">Hazırlanır…</string>
+    <string name="share_failed">Fayl hazırlanmadı</string>
+    <string name="share_chooser_title">Sifarişi paylaş</string>
 </resources>

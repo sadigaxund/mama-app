@@ -203,4 +203,17 @@
         <item quantity="one">%1$d due soon: %2$s</item>
         <item quantity="other">%1$d due soon: %2$s</item>
     </plurals>
+    <string name="share_header">Order #%1$d</string>
+    <string name="share_customer">Customer: %1$s</string>
+    <string name="share_phone">Phone: %1$s</string>
+    <string name="share_stage">Stage: %1$s</string>
+    <string name="share_next_visit">Next visit: %1$s</string>
+    <string name="share_overpaid">Overpaid</string>
+    <string name="share_date">Date: %1$s</string>
+    <string name="share_text">Text</string>
+    <string name="share_image">Image</string>
+    <string name="share_pdf">PDF</string>
+    <string name="share_preparing">Preparing…</string>
+    <string name="share_failed">Could not prepare the file</string>
+    <string name="share_chooser_title">Share order</string>
 </resources>

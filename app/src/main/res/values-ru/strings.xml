@@ -210,4 +210,17 @@
         <item quantity="many">%1$d скоро срок: %2$s</item>
         <item quantity="other">%1$d скоро срок: %2$s</item>
     </plurals>
+    <string name="share_header">Заказ #%1$d</string>
+    <string name="share_customer">Клиент: %1$s</string>
+    <string name="share_phone">Телефон: %1$s</string>
+    <string name="share_stage">Этап: %1$s</string>
+    <string name="share_next_visit">Следующий визит: %1$s</string>
+    <string name="share_overpaid">Переплата</string>
+    <string name="share_date">Дата: %1$s</string>
+    <string name="share_text">Текст</string>
+    <string name="share_image">Картинка</string>
+    <string name="share_pdf">PDF</string>
+    <string name="share_preparing">Готовлю…</string>
+    <string name="share_failed">Не удалось подготовить файл</string>
+    <string name="share_chooser_title">Поделиться заказом</string>
 </resources>

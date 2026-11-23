@@ -49,6 +49,8 @@ import com.mama.app.model.Stage;
 import com.mama.app.photo.AppFileProvider;
 import com.mama.app.photo.PhotoStore;
 import com.mama.app.reminders.Notifications;
+import com.mama.app.share.OrderSharer;
+import com.mama.app.share.OrderSummary;
 import com.mama.app.reminders.Reminders;
 import com.mama.app.ui.AppointmentFlow;
 import com.mama.app.ui.BaseActivity;
@@ -57,12 +59,15 @@ import com.mama.app.ui.Intents;
 import com.mama.app.ui.OrderCardAdapter;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /** One order: header, money ledger, notes and the stage moves. Reloads in onResume. */
 public class OrderDetailActivity extends BaseActivity {
@@ -86,6 +91,7 @@ public class OrderDetailActivity extends BaseActivity {
     private PhotoStore photoStore;
     private long orderId;
     private AlertDialog openDialog;
+    private final ExecutorService shareWorker = Executors.newSingleThreadExecutor();
     private static final int REQ_CAMERA = 1;
     private static final int REQ_GALLERY = 2;
     private static final String STATE_CAMERA_FILE = "camera_file";
@@ -128,7 +134,7 @@ public class OrderDetailActivity extends BaseActivity {
             bookPrompt = false;
             refresh();
         });
-        findViewById(R.id.btn_share).setOnClickListener(v -> soon());
+        findViewById(R.id.btn_share).setOnClickListener(v -> showShareChooser());
         findViewById(R.id.btn_add_payment).setOnClickListener(v -> showEntryDialog(LedgerType.PAYMENT));
         findViewById(R.id.btn_add_expense).setOnClickListener(v -> showEntryDialog(LedgerType.EXPENSE));
     }
@@ -160,6 +166,7 @@ public class OrderDetailActivity extends BaseActivity {
             openDialog.dismiss();
             openDialog = null;
         }
+        shareWorker.shutdown();
         db.close();
         super.onDestroy();
     }
@@ -174,8 +181,117 @@ public class OrderDetailActivity extends BaseActivity {
         }
     }
 
-    private void soon() {
-        Toast.makeText(this, R.string.coming_soon, Toast.LENGTH_SHORT).show();
+    // ---- sharing ----
+
+    private static final int SHARE_TEXT = 0;
+    private static final int SHARE_IMAGE = 1;
+    private static final int SHARE_PDF = 2;
+
+    private void showShareChooser() {
+        LinearLayout list = new LinearLayout(this);
+        list.setOrientation(LinearLayout.VERTICAL);
+        list.setPadding(dp(8), dp(8), dp(8), dp(8));
+        final AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.share)
+                .setView(list)
+                .create();
+        int[] labels = {R.string.share_text, R.string.share_image, R.string.share_pdf};
+        int[] icons = {R.drawable.ic_share_text, R.drawable.ic_share_image, R.drawable.ic_share_pdf};
+        for (int i = 0; i < labels.length; i++) {
+            final int form = i;
+            LinearLayout row = new LinearLayout(this);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            row.setGravity(Gravity.CENTER_VERTICAL);
+            row.setMinimumHeight(getResources().getDimensionPixelSize(R.dimen.form_touch));
+            row.setPadding(dp(16), 0, dp(16), 0);
+            row.setBackgroundResource(android.R.drawable.list_selector_background);
+            ImageView icon = new ImageView(this);
+            icon.setImageResource(icons[i]);
+            icon.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+            row.addView(icon, new LinearLayout.LayoutParams(dp(24), dp(24)));
+            TextView label = new TextView(this);
+            label.setText(labels[i]);
+            label.setTextColor(getColor(R.color.text_primary));
+            label.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.form_text_size));
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            lp.setMarginStart(dp(20));
+            row.addView(label, lp);
+            row.setOnClickListener(v -> {
+                showSharePreparing(dialog, list);
+                startShare(form);
+            });
+            list.addView(row, new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        }
+        showDialog(dialog);
+    }
+
+    /** Swaps the dialog content for a spinner while the file is made. */
+    private void showSharePreparing(AlertDialog dialog, LinearLayout list) {
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.HORIZONTAL);
+        box.setGravity(Gravity.CENTER_VERTICAL);
+        box.setPadding(dp(24), dp(24), dp(24), dp(24));
+        box.addView(new ProgressBar(this), new LinearLayout.LayoutParams(dp(40), dp(40)));
+        TextView t = new TextView(this);
+        t.setText(R.string.share_preparing);
+        t.setTextColor(getColor(R.color.text_primary));
+        t.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.form_text_size));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.setMarginStart(dp(20));
+        box.addView(t, lp);
+        list.removeAllViews();
+        list.addView(box);
+        dialog.setCancelable(false);
+    }
+
+    /** Loads on this thread, renders on the worker, and opens the chooser back on this thread. */
+    private void startShare(final int form) {
+        final OrderSharer sharer = new OrderSharer(this);
+        final OrderSummary summary = sharer.load(db, orderId, System.currentTimeMillis());
+        if (summary == null) {
+            finishShare(null);
+            return;
+        }
+        shareWorker.execute(() -> {
+            Intent chooser = null;
+            try {
+                sharer.cleanOld(System.currentTimeMillis());
+                if (form == SHARE_TEXT) {
+                    chooser = sharer.textIntent(summary);
+                } else if (form == SHARE_IMAGE) {
+                    chooser = sharer.fileIntent(sharer.writePng(summary), "image/png", summary);
+                } else {
+                    chooser = sharer.fileIntent(sharer.writePdf(summary), "application/pdf", summary);
+                }
+            } catch (IOException | RuntimeException e) {
+                // A render or write failure must not crash the screen: log it and tell the user.
+                Log.w(TAG, "share: failed form " + form + ": " + e);
+            }
+            final Intent result = chooser;
+            runOnUiThread(() -> finishShare(result));
+        });
+    }
+
+    private void finishShare(Intent chooser) {
+        if (openDialog != null) {
+            openDialog.dismiss();
+        }
+        if (isFinishing() || isDestroyed()) {
+            return;
+        }
+        if (chooser == null) {
+            Toast.makeText(this, R.string.share_failed, Toast.LENGTH_LONG).show();
+            return;
+        }
+        try {
+            startActivity(chooser);
+        } catch (ActivityNotFoundException e) {
+            Log.w(TAG, "share: no target app");
+            Toast.makeText(this, R.string.share_failed, Toast.LENGTH_LONG).show();
+        }
     }
 
     private int dp(int value) {
