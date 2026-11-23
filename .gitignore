@@ -1,0 +1,20 @@
+# Gradle and build output
+.gradle/
+build/
+app/build/
+
+# Machine-local SDK path
+local.properties
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Signing material
+*.jks
+*.keystore
+keystore.properties
+
+# Local scratch
+tmp/
