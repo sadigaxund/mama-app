@@ -23,8 +23,7 @@ step lands as one commit and is checked on a device before it is ticked.
 11. [x] Appointments: add, edit, delete, banner on fitting and done moves
 12. [x] Reminders: morning notification group, actions, appointment alarms, reboot
 13. [x] Share: text, image and PDF
-14. [x] Backup: sign-in, daily Drive folder sync, restore (code done; works once
-    the maintainer finishes `docs/backup-setup.md`)
+14. [x] Backup: sign-in, daily Drive folder sync, restore
 15. [ ] Check every step on the physical phone (Android 17, font scale 1.45).
     The call button opens the dialer with the number. Still open:
     - Picking a contact fills the phone, and the name only when empty.
@@ -32,9 +31,9 @@ step lands as one commit and is checked on a device before it is ticked.
     - The morning notification arrives at its set time, and after a reboot.
     - A visit reminder pops up with sound, and its call button opens the dialer.
     - The notification permission prompt appears once, after the first order.
-    - After the Google Cloud setup: sign-in, a first backup, the folder in
-      Drive, and a restore on a cleared app. Waydroid has Play Services, so
-      this can also be checked there.
+    - Settings shows the account email after signing in again.
+    - Sign-in and a backup on the phone. Waydroid passed sign-in, backup and
+      a restore on a cleared app.
 
 ## Possible features
 
