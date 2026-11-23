@@ -46,6 +46,7 @@ import com.mama.app.reminders.MorningNotifier;
 import com.mama.app.reminders.Notifications;
 import com.mama.app.ui.NotificationPermission;
 import com.mama.app.ui.AppointmentFlow;
+import com.mama.app.ui.BackupUi;
 import com.mama.app.ui.BaseActivity;
 import com.mama.app.ui.Format;
 import com.mama.app.ui.OrderCardAdapter;
@@ -140,6 +141,10 @@ public class MainActivity extends BaseActivity {
 
         if (savedInstanceState != null) {
             selected = savedInstanceState.getInt(STATE_STAGE, 0);
+        }
+
+        if (savedInstanceState == null) {
+            BackupUi.maybeShowFirstLaunch(this, null);
         }
 
         filter = Prefs.filter(this);
@@ -240,6 +245,9 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (BackupUi.onActivityResult(this, requestCode, resultCode, data)) {
+            return;
+        }
         if (requestCode == REQUEST_FORM && resultCode == RESULT_OK && data != null) {
             String name = data.getStringExtra(OrderFormActivity.EXTRA_STAGE);
             for (int i = 0; i < stages.length; i++) {

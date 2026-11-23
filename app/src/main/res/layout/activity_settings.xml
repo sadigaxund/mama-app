@@ -216,11 +216,8 @@
             android:text="@string/section_backup" />
 
         <LinearLayout
-            android:id="@+id/row_backup"
-            style="@style/SettingsRow"
-            android:alpha="0.5"
-            android:clickable="false"
-            android:enabled="false">
+            android:id="@+id/row_backup_account"
+            style="@style/SettingsRow">
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -229,11 +226,82 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/row_backup_title"
+                    android:id="@+id/row_backup_account_title"
                     style="@style/SettingsRowTitle" />
 
                 <TextView
-                    android:id="@+id/row_backup_sub"
+                    android:id="@+id/row_backup_account_sub"
+                    style="@style/SettingsRowSub" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/row_backup_signout"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/form_touch"
+                android:gravity="center_vertical"
+                android:paddingStart="@dimen/form_gap"
+                android:text="@string/backup_sign_out"
+                android:textColor="@color/accent"
+                android:textSize="@dimen/form_text_size"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/row_backup_last"
+            style="@style/SettingsRow">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/row_backup_last_title"
+                    style="@style/SettingsRowTitle" />
+
+                <TextView
+                    android:id="@+id/row_backup_last_sub"
+                    style="@style/SettingsRowSub" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/row_backup_now"
+            style="@style/SettingsRow">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/row_backup_now_title"
+                    style="@style/SettingsRowTitle" />
+
+                <TextView
+                    android:id="@+id/row_backup_now_sub"
+                    style="@style/SettingsRowSub" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/row_backup_restore"
+            style="@style/SettingsRow">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/row_backup_restore_title"
+                    style="@style/SettingsRowTitle" />
+
+                <TextView
+                    android:id="@+id/row_backup_restore_sub"
                     style="@style/SettingsRowSub" />
             </LinearLayout>
         </LinearLayout>

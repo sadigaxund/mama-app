@@ -23,7 +23,8 @@ step lands as one commit and is checked on a device before it is ticked.
 11. [x] Appointments: add, edit, delete, banner on fitting and done moves
 12. [x] Reminders: morning notification group, actions, appointment alarms, reboot
 13. [x] Share: text, image and PDF
-14. [ ] Backup: Google Cloud setup, sign-in, daily Drive folder sync, restore
+14. [x] Backup: sign-in, daily Drive folder sync, restore (code done; works once
+    the maintainer finishes `docs/backup-setup.md`)
 15. [ ] Check every step on the physical phone. Items Waydroid could not prove:
     - Picking a contact fills the phone, and the name only when empty.
     - The call button opens the dialer with the number.
@@ -31,6 +32,9 @@ step lands as one commit and is checked on a device before it is ticked.
     - The morning notification arrives at its set time, and after a reboot.
     - A visit reminder pops up with sound, and its call button opens the dialer.
     - The notification permission prompt appears once, after the first order.
+    - After the Google Cloud setup: sign-in, a first backup, the folder in
+      Drive, and a restore on a cleared app. Waydroid has Play Services, so
+      this can also be checked there.
 
 ## Possible features
 
@@ -63,6 +67,9 @@ it, and the question goes below.
    came from. Good enough, or should the app remember the exact stage?
 3. The new-type picker seeds seven Russian garment types on first launch:
    Костюм, Платье, Брюки, Юбка, Пиджак, Рубашка, Пальто. Change the list?
+5. Google Cloud setup for backup: follow `docs/backup-setup.md` (about 15
+   minutes). The debug key fingerprint is listed in the orchestrator's
+   final message.
 4. There is no `README.md`, which `AGENTS.md` says the maintainer owns.
    `docs/architecture.md` is not linked from anywhere until one exists. May
    the orchestrator write a short one?

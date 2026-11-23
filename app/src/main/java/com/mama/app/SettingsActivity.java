@@ -14,7 +14,10 @@ import android.widget.ScrollView;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.mama.app.backup.BackupPrefs;
+import com.mama.app.backup.BackupRunner;
 import com.mama.app.model.ReminderDays;
+import com.mama.app.ui.BackupUi;
 import com.mama.app.ui.BaseActivity;
 import com.mama.app.ui.Format;
 import com.mama.app.reminders.AppointmentScheduler;
@@ -26,7 +29,7 @@ import com.mama.app.ui.ReminderDaysEditor;
 import java.util.Currency;
 import java.util.List;
 
-/** Language, currency, reminder defaults and the backup placeholder. Values live in Prefs. */
+/** Language, currency, reminder defaults and the Drive backup rows. Values live in Prefs. */
 public class SettingsActivity extends BaseActivity {
     private static final String[] LANGUAGE_CODES = {"ru", "az", "en"};
     private static final int[] LANGUAGE_NAMES = {R.string.lang_ru, R.string.lang_az, R.string.lang_en};
@@ -52,8 +55,10 @@ public class SettingsActivity extends BaseActivity {
         setTitle(R.id.row_time, R.string.morning_time);
         setTitle(R.id.row_days, R.string.row_reminder_days);
         setTitle(R.id.row_visit, R.string.row_visit);
-        setTitle(R.id.row_backup, R.string.backup_drive);
-        sub(R.id.row_backup).setText(R.string.backup_drive_sub);
+        ((TextView) findViewById(R.id.row_backup_last_title)).setText(R.string.backup_last_title);
+        ((TextView) findViewById(R.id.row_backup_now_title)).setText(R.string.backup_now_title);
+        ((TextView) findViewById(R.id.row_backup_restore_title)).setText(R.string.backup_restore_title);
+        ((TextView) findViewById(R.id.row_backup_restore_sub)).setText(R.string.backup_restore_sub);
         ((TextView) findViewById(R.id.version)).setText(getString(R.string.settings_version, versionName()));
 
         findViewById(R.id.row_lang).setOnClickListener(v -> chooseLanguage());
@@ -67,6 +72,17 @@ public class SettingsActivity extends BaseActivity {
         rowTime.setOnClickListener(v -> chooseMorningTime());
         findViewById(R.id.row_days).setOnClickListener(v -> editReminderDays());
         findViewById(R.id.row_visit).setOnClickListener(v -> chooseVisitLead());
+        findViewById(R.id.row_backup_account).setOnClickListener(v -> {
+            if (!BackupPrefs.signedIn(this) || BackupPrefs.needsSignIn(this)) {
+                BackupUi.signIn(this, this::refresh);
+            }
+        });
+        findViewById(R.id.row_backup_signout).setOnClickListener(v -> BackupUi.confirmSignOut(this, this::refresh));
+        findViewById(R.id.row_backup_now).setOnClickListener(v -> {
+            BackupUi.backUpNow(this);
+            refresh();
+        });
+        findViewById(R.id.row_backup_restore).setOnClickListener(v -> BackupUi.restoreFromSettings(this));
         findViewById(R.id.row_notif_blocked).setOnClickListener(v -> {
             try {
                 startActivity(NotificationPermission.settingsIntent(this));
@@ -82,6 +98,19 @@ public class SettingsActivity extends BaseActivity {
         super.onResume();
         // The user may have come back from the system page.
         refresh();
+        BackupRunner.setListener(this::refresh);
+    }
+
+    @Override
+    protected void onPause() {
+        BackupRunner.setListener(null);
+        super.onPause();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        BackupUi.onActivityResult(this, requestCode, resultCode, data);
     }
 
     private void setTitle(int rowId, int resId) {
@@ -93,8 +122,7 @@ public class SettingsActivity extends BaseActivity {
         if (rowId == R.id.row_cur) return R.id.row_cur_title;
         if (rowId == R.id.row_time) return R.id.row_time_title;
         if (rowId == R.id.row_days) return R.id.row_days_title;
-        if (rowId == R.id.row_visit) return R.id.row_visit_title;
-        return R.id.row_backup_title;
+        return R.id.row_visit_title;
     }
 
     private TextView sub(int rowId) {
@@ -103,7 +131,7 @@ public class SettingsActivity extends BaseActivity {
                 : rowId == R.id.row_cur ? R.id.row_cur_sub
                 : rowId == R.id.row_time ? R.id.row_time_sub
                 : rowId == R.id.row_days ? R.id.row_days_sub
-                : rowId == R.id.row_visit ? R.id.row_visit_sub : R.id.row_backup_sub;
+                : R.id.row_visit_sub;
         return row.findViewById(id);
     }
 
@@ -141,6 +169,60 @@ public class SettingsActivity extends BaseActivity {
             }
         }
         sub(R.id.row_visit).setText(label);
+        refreshBackup();
+    }
+
+    private void refreshBackup() {
+        boolean signedIn = BackupPrefs.signedIn(this);
+        boolean running = BackupRunner.isRunning();
+
+        TextView accountTitle = findViewById(R.id.row_backup_account_title);
+        TextView accountSub = findViewById(R.id.row_backup_account_sub);
+        View signOut = findViewById(R.id.row_backup_signout);
+        if (signedIn) {
+            String email = BackupPrefs.email(this);
+            accountTitle.setText(email != null ? email : getString(R.string.backup_connected));
+            if (BackupPrefs.needsSignIn(this)) {
+                accountSub.setText(R.string.backup_reconnect);
+                accountSub.setVisibility(View.VISIBLE);
+            } else {
+                accountSub.setVisibility(View.GONE);
+            }
+            signOut.setVisibility(View.VISIBLE);
+        } else {
+            accountTitle.setText(R.string.backup_prompt_sign_in);
+            accountSub.setText(R.string.backup_account_sub);
+            accountSub.setVisibility(View.VISIBLE);
+            signOut.setVisibility(View.GONE);
+        }
+        findViewById(R.id.row_backup_account).setClickable(!signedIn || BackupPrefs.needsSignIn(this));
+
+        TextView last = findViewById(R.id.row_backup_last_sub);
+        BackupPrefs.Failure failure = BackupPrefs.lastFailure(this);
+        long ok = BackupPrefs.lastSuccess(this);
+        if (signedIn && failure != null) {
+            last.setText(BackupUi.failureText(this, failure));
+            last.setTextColor(getResources().getColor(R.color.error, getTheme()));
+        } else {
+            last.setText(ok > 0 ? BackupUi.whenText(this, ok) : getString(R.string.backup_last_never));
+            last.setTextColor(getResources().getColor(R.color.text_muted, getTheme()));
+        }
+
+        View now = findViewById(R.id.row_backup_now);
+        TextView nowSub = findViewById(R.id.row_backup_now_sub);
+        boolean canRun = signedIn && !running;
+        now.setEnabled(canRun);
+        now.setClickable(canRun);
+        now.setAlpha(canRun || running ? 1f : 0.5f);
+        if (running) {
+            nowSub.setText(BackupUi.progressText(this, BackupRunner.progress()));
+            nowSub.setVisibility(View.VISIBLE);
+        } else if (!signedIn) {
+            nowSub.setText(R.string.backup_now_need_sign_in);
+            nowSub.setVisibility(View.VISIBLE);
+        } else {
+            nowSub.setVisibility(View.GONE);
+        }
     }
 
     private String languageCode() {

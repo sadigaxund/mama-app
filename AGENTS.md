@@ -23,7 +23,7 @@ command line with the Gradle wrapper. No Android Studio is required.
 | Android Gradle Plugin | 8.7.3 | `build.gradle` |
 | `compileSdk` / `targetSdk` | 35 | `app/build.gradle` |
 | `minSdk` | 26 | `app/build.gradle` |
-| `com.google.android.gms:play-services-auth` | latest stable at adoption | `app/build.gradle` |
+| `com.google.android.gms:play-services-auth` | 22.0.0 | `app/build.gradle` |
 | `junit:junit` (JVM tests only) | 4.13.2 | `app/build.gradle` |
 
 - Language is Java. No Kotlin, no Jetpack Compose, no third-party library.

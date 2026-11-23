@@ -10,10 +10,11 @@ The package root is `com.mama.app`.
 |---|---|---|
 | `model` | enums, value classes, `Money`, `ReminderDays`, `ReminderPlanner` | none |
 | `data` | `DbHelper` and one repository per aggregate | `android.database`, `android.content` |
-| `ui` | `BaseActivity`, `LocaleSupport`, `Format`, `Prefs`, `Intents`, `OrderCardAdapter`, `ReminderDaysEditor` | `android.*` |
+| `ui` | `BaseActivity`, `LocaleSupport`, `Format`, `Prefs`, `Intents`, `OrderCardAdapter`, `ReminderDaysEditor`, `BackupUi` | `android.*` |
 | `reminders` | alarms, receivers and notification builders | `android.*` |
 | `photo` | `PhotoStore` (import, thumbnails, delete), `AppFileProvider` | `android.*` |
 | `share` | `OrderSummary` (pure data and text), `OrderSummaryRenderer` (Canvas drawing), `OrderSharer` (files and intents) | `OrderSummary`: none; others `android.*` |
+| `backup` | Drive sign-in, REST client, backup and restore runs, the daily job | `android.*`; the only package that imports `com.google.*` |
 | `debug` | `DemoData`, demo orders for visual checks | `android.*` through the `data` package |
 
 Activities such as `MainActivity` sit in the package root. Services get their own packages in later steps. They call repositories and never write SQL.
@@ -21,7 +22,7 @@ Activities such as `MainActivity` sit in the package root. Services get their ow
 ## Rules
 
 - `model` has no `android.*` import. JVM tests in `app/src/test` run it without a device.
-- Repositories own all SQL. No other class opens a database or builds a query.
+- Repositories own all SQL. No other class opens a database or builds a query. `backup.BackupDb` is the one exception: it copies the database file and reads downloaded copies.
 - A repository takes a `DbHelper` in its constructor.
 - Time is injected. Every method that stamps a time takes `nowMillis` from its caller, so tests set the clock.
 - A repository validates its input and throws `IllegalArgumentException` with the reason.
@@ -64,6 +65,20 @@ A debuggable build runs the posts on demand: the `MainActivity` extras `debug_mo
 `OrderSummaryRenderer` lays the summary out as rows at a given width, drawn for 1080 px. `draw` paints all rows for the PNG. `paginate` and `drawPage` split the rows into pages for the PDF, so a page break falls between rows. Notes are split into one row per text line.
 
 `OrderSharer` writes `cacheDir/shared/order-<id>.png` and `.pdf` (A4, 595x842 pt, scaled to the page width) and builds the chooser intents. It deletes files in that folder older than one day. A debuggable build also copies each file to `getExternalFilesDir(null)/share-debug/`. `OrderDetailActivity` loads the summary on the UI thread and renders on a single worker thread.
+
+## Backup
+
+The `backup` package is the only code that imports `com.google.*` (`play-services-auth`) or `androidx.*`. Its own SharedPreferences file `backup` (`BackupPrefs`) holds the signed-in flag, the account email, the cached Drive folder ids, the last success time and fingerprint, the last failure, and the first-launch prompt flag.
+
+- `DriveAuth` signs in with `AuthorizationClient.authorize` and the one scope `drive.file`. A consent screen returns through `onActivityResult`. `accessTokenBlocking` gets a token on a background thread and never opens UI. When the user must act, it throws `AUTH`, and the run records "needs sign-in". `signOut` cancels the job, clears the local state and asks Google to revoke the grant.
+- `DriveClient` talks to Drive REST v3 over `HttpURLConnection` and `org.json`. HTTP errors become `DriveException` with a reason of `AUTH`, `NETWORK`, `QUOTA` or `OTHER`. Timeouts are 30 s to connect and 60 s to read.
+- `BackupRunner.run` does one run: it stops when not signed in or when the orders table is empty, skips an unchanged state unless forced, uploads photos missing in Drive, snapshots the database and uploads it as `orders.db` last. Nothing is deleted in Drive. `BackupFingerprint` holds the change check and the photo diff as pure functions.
+- `BackupDb.snapshot` copies `mama.db` to `cacheDir/backup/orders.db` inside an exclusive transaction. `validate` opens a downloaded copy read-only and checks the orders table and `user_version`.
+- `BackupScheduler` keeps one periodic `JobScheduler` job (24 h, unmetered network, persisted). `BackupJobService` runs `BackupRunner` on its own thread. `MamaApp` schedules the job again at each process start when signed in.
+- `RestoreRunner` finds the Drive copy, downloads and validates it, downloads the photos its `order_photo` table lists, then closes every `DbHelper` on `mama.db` (`DbHelper.closeAllOnAppDatabase`) and replaces the file. It refuses when orders exist.
+- `ui.BackupUi` holds the dialogs and flows for the board and Settings, so those Activities import no Google class. `MainActivity` shows the first-launch dialog once and forwards `onActivityResult`.
+
+The manifest sets `allowBackup="false"`, `fullBackupContent="false"` and `dataExtractionRules` to `res/xml/data_extraction_rules.xml`, which excludes every domain. The one-time Google Cloud setup is in `docs/backup-setup.md`.
 
 ## Debug package
 

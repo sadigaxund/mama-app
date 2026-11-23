@@ -2,6 +2,7 @@ package com.mama.app;
 
 import android.app.Application;
 
+import com.mama.app.backup.BackupScheduler;
 import com.mama.app.reminders.AppointmentScheduler;
 import com.mama.app.reminders.MorningScheduler;
 import com.mama.app.reminders.Notifications;
@@ -15,6 +16,7 @@ public class MamaApp extends Application {
         Notifications.createChannels(this);
         Reminders.setAppointmentListener(new AppointmentScheduler(this));
         MorningScheduler.schedule(this);
+        BackupScheduler.ensureScheduled(this);
         // A force-stop clears every alarm, so each process start sets the visit alarms again.
         new Thread(() -> AppointmentScheduler.rescheduleAll(this), "reschedule").start();
     }

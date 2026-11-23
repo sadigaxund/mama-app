@@ -5,6 +5,10 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
+
 /** Owns the schema. Pass a null name for an in-memory database in tests. */
 public class DbHelper extends SQLiteOpenHelper {
     public static final String DB_NAME = "mama.db";
@@ -18,8 +22,30 @@ public class DbHelper extends SQLiteOpenHelper {
         this(context, DB_NAME);
     }
 
+    private static final List<WeakReference<DbHelper>> LIVE = new ArrayList<>();
+
     public DbHelper(Context context, String name) {
         super(context, name, null, DB_VERSION);
+        synchronized (LIVE) {
+            LIVE.add(new WeakReference<>(this));
+        }
+    }
+
+    /**
+     * Closes every live helper on {@link #DB_NAME}, so a restore can replace the file. A closed
+     * helper opens the new file on its next use.
+     */
+    public static void closeAllOnAppDatabase() {
+        synchronized (LIVE) {
+            for (int i = LIVE.size() - 1; i >= 0; i--) {
+                DbHelper h = LIVE.get(i).get();
+                if (h == null) {
+                    LIVE.remove(i);
+                } else if (DB_NAME.equals(h.getDatabaseName())) {
+                    h.close();
+                }
+            }
+        }
     }
 
     @Override

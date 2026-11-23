@@ -102,6 +102,13 @@ public class OrderRepository {
         return v;
     }
 
+    /** The number of orders in every stage. */
+    public long count() {
+        try (android.database.Cursor c = helper.getReadableDatabase().rawQuery("SELECT COUNT(*) FROM orders", null)) {
+            return c.moveToFirst() ? c.getLong(0) : 0;
+        }
+    }
+
     public void delete(long id) {
         helper.getWritableDatabase().delete("orders", "id = ?", new String[]{Long.toString(id)});
     }
