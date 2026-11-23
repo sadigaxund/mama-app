@@ -1,6 +1,16 @@
 package com.mama.app.debug;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.net.Uri;
+import android.util.Log;
+
 import com.mama.app.data.AppointmentRepository;
+import com.mama.app.data.PhotoRepository;
+import com.mama.app.photo.PhotoStore;
 import com.mama.app.data.DbHelper;
 import com.mama.app.data.GarmentTypeRepository;
 import com.mama.app.data.LedgerRepository;
@@ -12,6 +22,9 @@ import com.mama.app.model.Order;
 import com.mama.app.model.ReminderMode;
 import com.mama.app.model.Stage;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -22,7 +35,7 @@ public final class DemoData {
     private DemoData() {}
 
     /** Inserts about ten orders when the orders table is empty. Returns true when it inserted. */
-    public static boolean seedIfEmpty(DbHelper helper, long nowMillis) {
+    public static boolean seedIfEmpty(Context context, DbHelper helper, long nowMillis) {
         OrderRepository orders = new OrderRepository(helper);
         for (int count : orders.countsByStage().values()) {
             if (count > 0) {
@@ -38,6 +51,7 @@ public final class DemoData {
         List<GarmentType> all = types.listAll();
         LedgerRepository ledger = new LedgerRepository(helper);
         AppointmentRepository appts = new AppointmentRepository(helper);
+        PhotoRepository photos = new PhotoRepository(helper);
         LocalDate today = LocalDate.now();
 
         String[][] names = {
@@ -58,6 +72,14 @@ public final class DemoData {
                     prices[i], today.plusDays(dayOffsets[i]), null, stages[i],
                     nowMillis, nowMillis, ReminderMode.DEFAULT);
             long id = orders.insert(o, deposits[i], nowMillis + i);
+            if (i == 0) {
+                addDemoPhoto(context, photos, id, Color.rgb(198, 40, 40), nowMillis);
+                addDemoPhoto(context, photos, id, Color.rgb(25, 118, 210), nowMillis + 1);
+                addDemoPhoto(context, photos, id, Color.rgb(46, 125, 50), nowMillis + 2);
+            }
+            if (i == 2) {
+                addDemoPhoto(context, photos, id, Color.rgb(106, 27, 154), nowMillis);
+            }
             if (i == 3) {
                 ledger.add(id, LedgerType.EXPENSE, 7500, "Ткань", nowMillis);
             }
@@ -77,5 +99,32 @@ public final class DemoData {
             }
         }
         return true;
+    }
+
+    /** Draws a 1200x900 test picture, imports it like a real photo and adds the row. */
+    private static void addDemoPhoto(Context context, PhotoRepository photos, long orderId, int color,
+                                     long nowMillis) {
+        Bitmap b = Bitmap.createBitmap(1200, 900, Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(b);
+        Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
+        c.drawColor(color);
+        p.setColor(Color.argb(90, 255, 255, 255));
+        c.drawCircle(300, 300, 220, p);
+        p.setColor(Color.argb(90, 0, 0, 0));
+        c.drawRect(600, 400, 1100, 800, p);
+        p.setColor(Color.WHITE);
+        p.setTextSize(120);
+        c.drawText("#" + orderId, 80, 840, p);
+        File tmp = new File(context.getCacheDir(), "demo-" + orderId + "-" + nowMillis + ".jpg");
+        try (FileOutputStream os = new FileOutputStream(tmp)) {
+            b.compress(Bitmap.CompressFormat.JPEG, 90, os);
+            String name = new PhotoStore(context).importPhoto(orderId, Uri.fromFile(tmp));
+            photos.add(orderId, name, nowMillis);
+        } catch (IOException e) {
+            Log.w("MamaApp", "demo photo failed: " + e);
+        } finally {
+            b.recycle();
+            tmp.delete();
+        }
     }
 }

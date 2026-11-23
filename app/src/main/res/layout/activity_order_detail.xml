@@ -165,7 +165,21 @@
 
             <!-- photos -->
             <TextView style="@style/DetailSection" android:text="@string/section_photos" />
+            <HorizontalScrollView
+                android:id="@+id/photo_scroll"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:overScrollMode="never"
+                android:scrollbars="none"
+                android:visibility="gone">
+                <LinearLayout
+                    android:id="@+id/photo_strip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
             <LinearLayout
+                android:id="@+id/photos_empty_box"
                 style="@style/DetailBox"
                 android:orientation="horizontal"
                 android:gravity="center_vertical">

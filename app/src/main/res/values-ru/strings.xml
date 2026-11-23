@@ -146,4 +146,13 @@
     <string name="currency_title">Валюта</string>
     <string name="visit_title">Напоминание о визите</string>
     <string name="section_general">Основные</string>
+    <string name="photo_source_camera">Камера</string>
+    <string name="photo_source_gallery">Галерея</string>
+    <string name="photo_delete_confirm">Удалить это фото? Это нельзя отменить.</string>
+    <string name="photo_import_failed">Не удалось добавить фото: %1$d</string>
+    <string name="photo_importing_desc">Добавление фото</string>
+    <string name="photo_delete_desc">Удалить фото</string>
+    <string name="photo_viewer_desc">%1$d / %2$d</string>
+    <string name="photo_thumb_desc">Фото</string>
+    <string name="no_gallery_app">Приложение галереи не найдено</string>
 </resources>

@@ -11,6 +11,7 @@ The package root is `com.mama.app`.
 | `model` | enums, value classes, `Money`, `ReminderDays` | none |
 | `data` | `DbHelper` and one repository per aggregate | `android.database`, `android.content` |
 | `ui` | `BaseActivity`, `LocaleSupport`, `Format`, `Prefs`, `Intents`, `OrderCardAdapter`, `ReminderDaysEditor` | `android.*` |
+| `photo` | `PhotoStore` (import, thumbnails, delete), `AppFileProvider` | `android.*` |
 | `debug` | `DemoData`, demo orders for visual checks | `android.*` through the `data` package |
 
 Activities such as `MainActivity` sit in the package root. Services get their own packages in later steps. They call repositories and never write SQL.
@@ -35,6 +36,12 @@ Activities such as `MainActivity` sit in the package root. Services get their ow
 - `Intents` builds the contacts picker intent (`pickPhoneContact`) and the dialer intent (`dial`). Callers catch `ActivityNotFoundException` and show a Toast. The manifest `<queries>` block lists both intents for Android 11 package visibility. The app holds no contacts or phone permission.
 - `OrderCardAdapter` is a `BaseAdapter` over fully loaded `Row` objects. `MainActivity` loads the rows, so `getView` never queries the database.
 - The board loads in `onResume`. A swipe on the list area is read in `MainActivity.dispatchTouchEvent` with a `GestureDetector`.
+
+## Photos
+
+`PhotoStore` keeps photos in `filesDir/photos` as `<orderId>-<epochMillis>.jpg`. Import shrinks the long edge to 2048 px, applies the EXIF orientation and saves JPEG quality 85, on a single background thread. The same job adds the `order_photo` rows. Thumbnails share one `LruCache`.
+
+`AppFileProvider` (authority `<applicationId>.files`, not exported) serves files under `cacheDir/shared` and `cacheDir/camera`. It refuses any path whose canonical form leaves those folders. The camera app writes its picture into `cacheDir/camera` through it. No camera permission is declared.
 
 ## Debug package
 

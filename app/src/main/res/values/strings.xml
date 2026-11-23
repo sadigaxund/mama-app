@@ -147,4 +147,13 @@
     <string name="lang_az" translatable="false">Azərbaycan</string>
     <string name="lang_en" translatable="false">English</string>
     <string name="section_general">General</string>
+    <string name="photo_source_camera">Camera</string>
+    <string name="photo_source_gallery">Gallery</string>
+    <string name="photo_delete_confirm">Delete this photo? This cannot be undone.</string>
+    <string name="photo_import_failed">Could not add %1$d photo(s)</string>
+    <string name="photo_importing_desc">Adding photos</string>
+    <string name="photo_delete_desc">Delete photo</string>
+    <string name="photo_viewer_desc">%1$d / %2$d</string>
+    <string name="photo_thumb_desc">Photo</string>
+    <string name="no_gallery_app">No gallery app found</string>
 </resources>

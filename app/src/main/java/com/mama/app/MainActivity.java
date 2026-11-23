@@ -40,6 +40,7 @@ import com.mama.app.model.Order;
 import com.mama.app.model.OrderFilter;
 import com.mama.app.model.OrderPhoto;
 import com.mama.app.model.Stage;
+import com.mama.app.photo.PhotoStore;
 import com.mama.app.ui.BaseActivity;
 import com.mama.app.ui.OrderCardAdapter;
 import com.mama.app.ui.Prefs;
@@ -67,6 +68,7 @@ public class MainActivity extends BaseActivity {
     private LedgerRepository ledger;
     private AppointmentRepository appointments;
     private PhotoRepository photos;
+    private PhotoStore photoStore;
 
     private final Stage[] stages = Stage.values();
     private final List<View> tabViews = new ArrayList<>();
@@ -112,10 +114,11 @@ public class MainActivity extends BaseActivity {
         ledger = new LedgerRepository(db);
         appointments = new AppointmentRepository(db);
         photos = new PhotoRepository(db);
+        photoStore = new PhotoStore(this);
 
         boolean debuggable = (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
         if (debuggable && getIntent().getBooleanExtra(EXTRA_SEED_DEMO, false)) {
-            if (DemoData.seedIfEmpty(db, System.currentTimeMillis())) {
+            if (DemoData.seedIfEmpty(this, db, System.currentTimeMillis())) {
                 Log.d(TAG, "demo data seeded");
             }
         }
@@ -541,27 +544,12 @@ public class MainActivity extends BaseActivity {
         return rows;
     }
 
-    /** The newest photo of the order, downsampled to the slot size, or null. */
+    /** The newest photo of the order at the slot size, from the shared thumbnail cache, or null. */
     private Bitmap loadThumb(long orderId) {
         OrderPhoto p = photos.newest(orderId);
         if (p == null) {
             return null;
         }
-        File f = new File(new File(getFilesDir(), "photos"), p.fileName);
-        int size = getResources().getDimensionPixelSize(R.dimen.photo_slot_size);
-        BitmapFactory.Options bounds = new BitmapFactory.Options();
-        bounds.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(f.getPath(), bounds);
-        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) {
-            Log.w(TAG, "photo unreadable: " + f.getName());
-            return null;
-        }
-        int sample = 1;
-        while (bounds.outWidth / (sample * 2) >= size && bounds.outHeight / (sample * 2) >= size) {
-            sample *= 2;
-        }
-        BitmapFactory.Options opts = new BitmapFactory.Options();
-        opts.inSampleSize = sample;
-        return BitmapFactory.decodeFile(f.getPath(), opts);
+        return photoStore.loadThumbnail(p.fileName, getResources().getDimensionPixelSize(R.dimen.photo_slot_size));
     }
 }

@@ -3,7 +3,16 @@ package com.mama.app;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.ActivityNotFoundException;
+import android.app.Activity;
+import android.content.ClipData;
 import android.content.Intent;
+import android.net.Uri;
+import android.provider.MediaStore;
+import android.os.Build;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.view.ViewOutlineProvider;
+import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -35,6 +44,8 @@ import com.mama.app.model.Money;
 import com.mama.app.model.Order;
 import com.mama.app.model.OrderPhoto;
 import com.mama.app.model.Stage;
+import com.mama.app.photo.AppFileProvider;
+import com.mama.app.photo.PhotoStore;
 import com.mama.app.ui.BaseActivity;
 import com.mama.app.ui.Format;
 import com.mama.app.ui.Intents;
@@ -45,6 +56,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 /** One order: header, money ledger, notes and the stage moves. Reloads in onResume. */
@@ -62,8 +74,15 @@ public class OrderDetailActivity extends BaseActivity {
     private GarmentTypeRepository garmentTypes;
     private LedgerRepository ledger;
     private PhotoRepository photos;
+    private PhotoStore photoStore;
     private long orderId;
     private AlertDialog openDialog;
+    private static final int REQ_CAMERA = 1;
+    private static final int REQ_GALLERY = 2;
+    private static final String STATE_CAMERA_FILE = "camera_file";
+    /** Photos being imported by background jobs started from this screen. */
+    private int pendingImports;
+    private File cameraFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +94,11 @@ public class OrderDetailActivity extends BaseActivity {
         garmentTypes = new GarmentTypeRepository(db);
         ledger = new LedgerRepository(db);
         photos = new PhotoRepository(db);
+        photoStore = new PhotoStore(this);
+        if (savedInstanceState != null && savedInstanceState.getString(STATE_CAMERA_FILE) != null) {
+            cameraFile = new File(new File(getCacheDir(), AppFileProvider.DIR_CAMERA),
+                    savedInstanceState.getString(STATE_CAMERA_FILE));
+        }
         orderId = getIntent().getLongExtra(EXTRA_ORDER_ID, 0);
 
         findViewById(R.id.btn_back).setOnClickListener(v -> finish());
@@ -82,7 +106,7 @@ public class OrderDetailActivity extends BaseActivity {
                 startActivity(OrderFormActivity.editIntent(this, orderId)));
         findViewById(R.id.btn_delete).setOnClickListener(v -> confirmDeleteOrder());
         findViewById(R.id.btn_call).setOnClickListener(v -> dial());
-        findViewById(R.id.btn_add_photo).setOnClickListener(v -> soon());
+        findViewById(R.id.btn_add_photo).setOnClickListener(v -> showPhotoChooser());
         findViewById(R.id.btn_add_visit).setOnClickListener(v -> soon());
         findViewById(R.id.btn_share).setOnClickListener(v -> soon());
         findViewById(R.id.btn_add_payment).setOnClickListener(v -> showEntryDialog(LedgerType.PAYMENT));
@@ -93,6 +117,14 @@ public class OrderDetailActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         refresh();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle out) {
+        super.onSaveInstanceState(out);
+        if (cameraFile != null) {
+            out.putString(STATE_CAMERA_FILE, cameraFile.getName());
+        }
     }
 
     @Override
@@ -143,6 +175,7 @@ public class OrderDetailActivity extends BaseActivity {
         notes.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(
                 noNotes ? R.dimen.body_text_size : R.dimen.form_text_size));
 
+        bindPhotos();
         bindActions(o);
     }
 
@@ -349,12 +382,8 @@ public class OrderDetailActivity extends BaseActivity {
         // The rows go with the order, so the file names are read first.
         List<OrderPhoto> rows = photos.listForOrder(orderId);
         orders.delete(orderId);
-        File dir = new File(getFilesDir(), "photos");
         for (OrderPhoto p : rows) {
-            File f = new File(dir, p.fileName);
-            if (f.exists() && !f.delete()) {
-                Log.w(TAG, "photo file not deleted: " + f.getName());
-            }
+            photoStore.delete(p.fileName);
         }
         Log.d(TAG, "order #" + orderId + " deleted");
         finish();
@@ -364,6 +393,192 @@ public class OrderDetailActivity extends BaseActivity {
         openDialog = d;
         d.setOnDismissListener(x -> openDialog = null);
         d.show();
+    }
+
+    // ---- photos ----
+
+    private void bindPhotos() {
+        final List<OrderPhoto> list = photos.listForOrder(orderId);
+        View scroll = findViewById(R.id.photo_scroll);
+        View empty = findViewById(R.id.photos_empty_box);
+        boolean any = !list.isEmpty() || pendingImports > 0;
+        scroll.setVisibility(any ? View.VISIBLE : View.GONE);
+        empty.setVisibility(any ? View.GONE : View.VISIBLE);
+        LinearLayout strip = findViewById(R.id.photo_strip);
+        strip.removeAllViews();
+        if (!any) {
+            return;
+        }
+        int size = getResources().getDimensionPixelSize(R.dimen.photo_thumb_size);
+        int gap = getResources().getDimensionPixelSize(R.dimen.photo_thumb_gap);
+
+        TextView add = new TextView(this);
+        add.setText(R.string.photos_add);
+        add.setGravity(Gravity.CENTER);
+        add.setTextColor(getColor(R.color.accent));
+        add.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.body_text_size));
+        add.setTypeface(null, Typeface.BOLD);
+        add.setBackgroundResource(R.drawable.field_bg);
+        add.setOnClickListener(v -> showPhotoChooser());
+        strip.addView(add, new LinearLayout.LayoutParams(size, size));
+
+        if (pendingImports > 0) {
+            ProgressBar bar = new ProgressBar(this);
+            bar.setIndeterminate(true);
+            bar.setContentDescription(getString(R.string.photo_importing_desc));
+            android.widget.FrameLayout tile = new android.widget.FrameLayout(this);
+            tile.setBackgroundResource(R.drawable.field_bg);
+            tile.addView(bar, new android.widget.FrameLayout.LayoutParams(dp(32), dp(32), Gravity.CENTER));
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(size, size);
+            lp.setMarginStart(gap);
+            strip.addView(tile, lp);
+        }
+
+        for (int i = 0; i < list.size(); i++) {
+            final int index = i;
+            final String name = list.get(i).fileName;
+            final ImageView thumb = new ImageView(this);
+            thumb.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            thumb.setContentDescription(getString(R.string.photo_thumb_desc));
+            GradientDrawable shape = new GradientDrawable();
+            shape.setColor(getColor(R.color.tab_divider));
+            shape.setCornerRadius(getResources().getDimension(R.dimen.photo_slot_radius));
+            thumb.setBackground(shape);
+            thumb.setClipToOutline(true);
+            thumb.setOutlineProvider(ViewOutlineProvider.BACKGROUND);
+            thumb.setOnClickListener(v -> startActivity(PhotoViewerActivity.intent(this, orderId, index)));
+            Bitmap hit = photoStore.cachedThumbnail(name, size);
+            if (hit != null) {
+                thumb.setImageBitmap(hit);
+            } else {
+                thumb.setTag(name);
+                photoStore.loadThumbnailAsync(name, size, bmp -> {
+                    // The strip is rebuilt on refresh. A view that was replaced keeps a stale tag.
+                    if (bmp != null && name.equals(thumb.getTag())) {
+                        thumb.setImageBitmap(bmp);
+                    }
+                });
+            }
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(size, size);
+            lp.setMarginStart(gap);
+            strip.addView(thumb, lp);
+        }
+    }
+
+    private void showPhotoChooser() {
+        final boolean hasCamera = cameraIntent(null) != null;
+        final List<CharSequence> labels = new ArrayList<>();
+        if (hasCamera) {
+            labels.add(getString(R.string.photo_source_camera));
+        }
+        labels.add(getString(R.string.photo_source_gallery));
+        showDialog(new AlertDialog.Builder(this)
+                .setTitle(R.string.section_photos)
+                .setItems(labels.toArray(new CharSequence[0]), (d, which) -> {
+                    if (hasCamera && which == 0) {
+                        startCamera();
+                    } else {
+                        startGallery();
+                    }
+                })
+                .create());
+    }
+
+    /** The capture intent, or null when no camera app resolves. {@code output} may be null to probe. */
+    private Intent cameraIntent(Uri output) {
+        Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (i.resolveActivity(getPackageManager()) == null) {
+            return null;
+        }
+        if (output != null) {
+            i.putExtra(MediaStore.EXTRA_OUTPUT, output);
+            i.setClipData(ClipData.newRawUri("", output));
+            i.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        }
+        return i;
+    }
+
+    private void startCamera() {
+        File dir = new File(getCacheDir(), AppFileProvider.DIR_CAMERA);
+        if (!dir.isDirectory() && !dir.mkdirs()) {
+            Log.w(TAG, "camera folder not created");
+        }
+        cameraFile = new File(dir, "capture-" + orderId + "-" + System.currentTimeMillis() + ".jpg");
+        Uri out = AppFileProvider.uriFor(this, AppFileProvider.DIR_CAMERA, cameraFile.getName());
+        Intent i = cameraIntent(out);
+        if (i == null) {
+            return;
+        }
+        try {
+            startActivityForResult(i, REQ_CAMERA);
+        } catch (ActivityNotFoundException e) {
+            Log.w(TAG, "detail: no camera app");
+            cameraFile = null;
+        }
+    }
+
+    private void startGallery() {
+        Intent i;
+        if (Build.VERSION.SDK_INT >= 33) {
+            i = new Intent(MediaStore.ACTION_PICK_IMAGES);
+            i.putExtra(MediaStore.EXTRA_PICK_IMAGES_MAX, 10);
+        } else {
+            i = new Intent(Intent.ACTION_GET_CONTENT).setType("image/*")
+                    .addCategory(Intent.CATEGORY_OPENABLE)
+                    .putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        }
+        try {
+            startActivityForResult(i, REQ_GALLERY);
+        } catch (ActivityNotFoundException e) {
+            Log.w(TAG, "detail: no gallery app");
+            Toast.makeText(this, R.string.no_gallery_app, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQ_CAMERA) {
+            File f = cameraFile;
+            cameraFile = null;
+            if (f == null) {
+                return;
+            }
+            if (resultCode == Activity.RESULT_OK && f.length() > 0) {
+                List<Uri> one = new ArrayList<>();
+                one.add(Uri.fromFile(f));
+                startImport(one, f);
+            } else if (f.exists() && !f.delete()) {
+                Log.w(TAG, "camera temp not deleted: " + f.getName());
+            }
+        } else if (requestCode == REQ_GALLERY && resultCode == Activity.RESULT_OK && data != null) {
+            List<Uri> uris = new ArrayList<>();
+            if (data.getClipData() != null) {
+                for (int i = 0; i < data.getClipData().getItemCount(); i++) {
+                    uris.add(data.getClipData().getItemAt(i).getUri());
+                }
+            } else if (data.getData() != null) {
+                uris.add(data.getData());
+            }
+            if (!uris.isEmpty()) {
+                startImport(uris, null);
+            }
+        }
+    }
+
+    private void startImport(List<Uri> uris, File temp) {
+        pendingImports += uris.size();
+        bindPhotos();
+        final int n = uris.size();
+        photoStore.importAsync(orderId, uris, temp, (added, failed) -> {
+            pendingImports -= n;
+            if (failed > 0) {
+                Toast.makeText(this, getString(R.string.photo_import_failed, failed), Toast.LENGTH_LONG).show();
+            }
+            if (!isDestroyed()) {
+                bindPhotos();
+            }
+        });
     }
 
     // ---- moves ----

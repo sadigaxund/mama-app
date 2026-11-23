@@ -19,7 +19,7 @@ step lands as one commit and is checked on a device before it is ticked.
 7. [x] Phone: contacts picker and call button
 8. [x] Search, filter, sort
 9. [x] Settings: language (RU default, AZ, EN) and currency (AZN default)
-10. [ ] Photos: camera and gallery, card thumbnail, full-screen view
+10. [x] Photos: camera and gallery, card thumbnail, full-screen view
 11. [ ] Appointments: add, edit, delete, banner on fitting and done moves
 12. [ ] Reminders: morning notification group, actions, appointment alarms, reboot
 13. [ ] Share: text, image and PDF
@@ -27,6 +27,7 @@ step lands as one commit and is checked on a device before it is ticked.
 15. [ ] Check every step on the physical phone. Items Waydroid could not prove:
     - Picking a contact fills the phone, and the name only when empty.
     - The call button opens the dialer with the number.
+    - Taking a photo with the camera adds it to the order, upright.
 
 ## Possible features
 

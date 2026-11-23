@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
+
+    <ImageView
+        android:id="@+id/image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/photo_thumb_desc"
+        android:scaleType="fitCenter" />
+
+    <LinearLayout
+        android:id="@+id/bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#66000000"
+        android:fitsSystemWindows="true"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <ImageButton
+            android:id="@+id/btn_back"
+            android:layout_width="@dimen/form_touch"
+            android:layout_height="@dimen/form_touch"
+            android:layout_marginStart="4dp"
+            android:background="@drawable/icon_button_ripple"
+            android:contentDescription="@string/detail_back_desc"
+            android:src="@drawable/ic_back" />
+
+        <TextView
+            android:id="@+id/counter"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingStart="8dp"
+            android:singleLine="true"
+            android:fontFeatureSettings="tnum"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/name_text_size"
+            android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/btn_delete"
+            android:layout_width="@dimen/form_touch"
+            android:layout_height="@dimen/form_touch"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/icon_button_ripple"
+            android:contentDescription="@string/photo_delete_desc"
+            android:src="@drawable/ic_delete" />
+    </LinearLayout>
+</FrameLayout>

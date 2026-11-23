@@ -144,4 +144,13 @@
     <string name="currency_title">Valyuta</string>
     <string name="visit_title">Görüş xatırlatması</string>
     <string name="section_general">Əsas</string>
+    <string name="photo_source_camera">Kamera</string>
+    <string name="photo_source_gallery">Qalereya</string>
+    <string name="photo_delete_confirm">Bu foto silinsin? Bunu geri qaytarmaq olmaz.</string>
+    <string name="photo_import_failed">Foto əlavə edilmədi: %1$d</string>
+    <string name="photo_importing_desc">Foto əlavə olunur</string>
+    <string name="photo_delete_desc">Fotonu sil</string>
+    <string name="photo_viewer_desc">%1$d / %2$d</string>
+    <string name="photo_thumb_desc">Foto</string>
+    <string name="no_gallery_app">Qalereya tətbiqi tapılmadı</string>
 </resources>
