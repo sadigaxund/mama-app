@@ -12,5 +12,6 @@
 - Photos from the camera or gallery on each order, shown on the card and in a full-screen viewer.
 - Visits (fittings, pickups) per order, with a prompt to book one after moving to a fitting or Done.
 - Morning reminders for upcoming and overdue deadlines, with Done, Move deadline and Stop actions, and a reminder before each visit.
+- Visit reminders can go off at several times before a visit, chosen in Settings.
 - Share an order as text, an image or a PDF bill through any app.
 - Daily backup of orders and photos to Google Drive, with restore on a new phone.

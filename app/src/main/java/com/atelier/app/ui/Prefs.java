@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import com.atelier.app.model.Kind;
 import com.atelier.app.model.OrderFilter;
 import com.atelier.app.model.ReminderDays;
+import com.atelier.app.model.VisitLeads;
 
 import java.util.List;
 
@@ -29,9 +30,11 @@ public final class Prefs {
     /** Date of the last morning post, as days since 1970-01-01. Absent when none. */
     public static final String KEY_MORNING_LAST_POSTED = "morning_last_posted";
 
-    /** Visit reminder lead time in minutes, 0 for off. */
-    public static final String KEY_VISIT_LEAD_MINUTES = "visit_lead_minutes";
-    public static final int DEFAULT_VISIT_LEAD_MINUTES = 60;
+    /** Visit reminder leads, minutes before the visit as VisitLeads CSV. Empty for off. */
+    public static final String KEY_VISIT_LEADS = "visit_leads";
+    public static final String DEFAULT_VISIT_LEADS = "60";
+    /** The single lead stored by older versions, 0 for off. Read only when KEY_VISIT_LEADS is absent. */
+    private static final String KEY_VISIT_LEAD_MINUTES_OLD = "visit_lead_minutes";
 
     /** True once the notification permission dialog has been shown. */
     public static final String KEY_NOTIFICATIONS_ASKED = "notifications_asked";
@@ -113,8 +116,15 @@ public final class Prefs {
         }
     }
 
-    /** Minutes before a visit to remind, 0 for off. */
-    public static int visitLeadMinutes(Context context) {
-        return get(context).getInt(KEY_VISIT_LEAD_MINUTES, DEFAULT_VISIT_LEAD_MINUTES);
+    /** Minutes before a visit to remind, largest first. Empty when visit reminders are off. */
+    public static List<Integer> visitLeads(Context context) {
+        SharedPreferences p = get(context);
+        if (p.contains(KEY_VISIT_LEADS)) {
+            return VisitLeads.parse(p.getString(KEY_VISIT_LEADS, DEFAULT_VISIT_LEADS));
+        }
+        if (p.contains(KEY_VISIT_LEAD_MINUTES_OLD)) {
+            return VisitLeads.fromSingle(p.getInt(KEY_VISIT_LEAD_MINUTES_OLD, 0));
+        }
+        return VisitLeads.parse(DEFAULT_VISIT_LEADS);
     }
 }

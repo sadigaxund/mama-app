@@ -19,7 +19,6 @@ import com.atelier.app.model.GarmentType;
 import com.atelier.app.model.Order;
 import com.atelier.app.ui.Format;
 import com.atelier.app.ui.Intents;
-import com.atelier.app.ui.Prefs;
 
 /** Builds and posts the reminder of one appointment. */
 public final class AppointmentNotifier {
@@ -27,8 +26,12 @@ public final class AppointmentNotifier {
 
     private AppointmentNotifier() {}
 
-    /** Does nothing when the appointment or its order is gone. Runs on a background thread. */
-    public static void post(Context appContext, long appointmentId) {
+    /**
+     * Posts the reminder sent leadMinutes before the visit. Each appointment has one notification id,
+     * so a later lead replaces an earlier one. Does nothing when the appointment or its order is gone.
+     * Runs on a background thread.
+     */
+    public static void post(Context appContext, long appointmentId, int leadMinutes) {
         Context ctx = Notifications.localized(appContext);
         DbHelper db = new DbHelper(ctx);
         try {
@@ -48,7 +51,7 @@ public final class AppointmentNotifier {
                     .setSmallIcon(R.drawable.ic_notification)
                     .setColor(ctx.getColor(R.color.accent))
                     .setCategory(Notification.CATEGORY_EVENT)
-                    .setContentTitle(ctx.getString(titleFor(Prefs.visitLeadMinutes(ctx)), o.customerName))
+                    .setContentTitle(ctx.getString(titleFor(leadMinutes), o.customerName))
                     .setContentText(line)
                     .setStyle(new Notification.BigTextStyle().bigText(text))
                     .setWhen(a.startsAt)
@@ -70,7 +73,7 @@ public final class AppointmentNotifier {
         }
     }
 
-    /** The title format for a lead time. An off lead (only a debug post gets here) reads as one hour. */
+    /** The title format for a lead time. A lead with no own title reads as one hour. */
     private static int titleFor(int leadMinutes) {
         switch (leadMinutes) {
             case 15: return R.string.notif_visit_15m;

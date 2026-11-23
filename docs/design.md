@@ -174,9 +174,11 @@ returns the next morning.
 
 ### Appointment reminders
 
-Each appointment reminds once, a set time before it starts. The default is 1
-hour, chosen in Settings from off, 15 minutes, 30 minutes, 1 hour, 2 hours or
-1 day. The notification has a call button when the order has a phone number.
+Each appointment reminds at every lead time ticked in Settings: 1 day, 2
+hours, 1 hour, 30 minutes or 15 minutes before it starts. The default is 1
+hour alone. Nothing ticked turns visit reminders off. A later reminder
+replaces the earlier notification of the same visit. The notification has a
+call button when the order has a phone number.
 This notification pops up over the screen, because a visit is close in time.
 
 ### Scheduling
@@ -186,8 +188,9 @@ This notification pops up over the screen, because a visit is close in time.
   reminder can arrive up to 10 minutes late.
 - The morning job reads the database when it fires, so it always reflects
   the current orders. No alarm is stored per deadline reminder.
-- Each appointment has its own alarm. It is rescheduled when the appointment
-  changes and cancelled when it is deleted.
+- Each appointment has one alarm per ticked lead time. They are rescheduled
+  when the appointment or the lead times change, and cancelled when it is
+  deleted.
 - After a reboot, the app reschedules every alarm, using
   `RECEIVE_BOOT_COMPLETED`.
 - On Android 13 and newer, the notification permission is requested the
@@ -332,7 +335,7 @@ Rows exist only for orders in `CUSTOM` mode.
 | Currency | any ISO 4217 code | AZN (₼) |
 | Morning notification | on or off, and a time | on, 09:00 |
 | Default deadline reminders | a list of days before the deadline | 3 days, 1 day |
-| Appointment reminder | off, 15 min, 30 min, 1 h, 2 h, 1 day before | 1 h |
+| Appointment reminders | any of 1 day, 2 h, 1 h, 30 min, 15 min before; none is off | 1 h |
 | Google account | signed in or not | asked on first launch, skippable |
 | Last backup | shown, with a "Back up now" button | |
 

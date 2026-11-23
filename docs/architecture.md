@@ -46,7 +46,7 @@ Activities such as `MainActivity` sit in the package root. Services get their ow
 
 `MorningScheduler` keeps one `setWindow` alarm for the next morning time. `MorningReceiver` calls `MorningNotifier` on a background thread, then sets the next day's alarm. `MorningNotifier` posts one summary and one notification per due order. Notification ids are `Notifications.orderId(order)`. The buttons go to `ReminderActionReceiver`, which moves the order to `DONE` or sets its mode to `OFF`.
 
-`AppointmentScheduler` sets one alarm per future appointment, with the appointment id as the request code. `AppointmentReceiver` calls `AppointmentNotifier`. `BootReceiver` sets every alarm again after boot, a time or zone change, and an app update.
+`AppointmentScheduler` sets one alarm per future appointment and lead time from `Prefs.visitLeads`. The data URI `atelier://appointment/<id>/<minutes>` keeps the alarms apart. `VisitLeads` (in `model`) parses and stores the lead list. `AppointmentReceiver` passes the lead to `AppointmentNotifier`, which picks the title from it. `BootReceiver` sets every alarm again after boot, a time or zone change, and an app update.
 
 SQLite deletes appointments with their order without calling `AppointmentListener`. `OrderDetailActivity` reads the appointment ids before the delete and cancels each alarm.
 

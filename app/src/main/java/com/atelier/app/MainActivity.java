@@ -205,7 +205,7 @@ public class MainActivity extends BaseActivity {
                     MorningNotifier.post(getApplicationContext());
                 }
                 if (appointmentId != 0) {
-                    AppointmentNotifier.post(getApplicationContext(), appointmentId);
+                    AppointmentNotifier.post(getApplicationContext(), appointmentId, 60);
                 }
             } catch (RuntimeException e) {
                 // A debug aid: report the failure in the log and keep the app running.

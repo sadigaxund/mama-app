@@ -7,12 +7,15 @@ import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
 
+import java.util.List;
+
 import com.atelier.app.data.AppointmentRepository;
 import com.atelier.app.data.DbHelper;
 import com.atelier.app.model.Appointment;
+import com.atelier.app.model.VisitLeads;
 import com.atelier.app.ui.Prefs;
 
-/** One inexact alarm per future appointment, set a lead time before it starts. */
+/** One inexact alarm per future appointment and chosen lead time. */
 public final class AppointmentScheduler implements AppointmentListener {
     private static final String TAG = "Atelier";
     private static final long WINDOW_MILLIS = 10 * 60 * 1000L;
@@ -34,31 +37,49 @@ public final class AppointmentScheduler implements AppointmentListener {
     }
 
     static final String EXTRA_APPOINTMENT_ID = "appointment_id";
+    static final String EXTRA_LEAD_MINUTES = "lead_minutes";
 
-    private static PendingIntent pending(Context ctx, long appointmentId) {
+    /** The data URI makes each (appointment, lead) pair a distinct PendingIntent. */
+    private static PendingIntent pending(Context ctx, long appointmentId, int leadMinutes) {
         Intent i = new Intent(ctx, AppointmentReceiver.class)
-                .setData(Uri.parse("atelier://appointment/" + appointmentId))
-                .putExtra(EXTRA_APPOINTMENT_ID, appointmentId);
+                .setData(Uri.parse("atelier://appointment/" + appointmentId + "/" + leadMinutes))
+                .putExtra(EXTRA_APPOINTMENT_ID, appointmentId)
+                .putExtra(EXTRA_LEAD_MINUTES, leadMinutes);
         return PendingIntent.getBroadcast(ctx, (int) appointmentId, i,
                 PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
-    /** Sets the alarm, or cancels it when the lead is off or the trigger time is already past. */
+    /** The one alarm per appointment that versions with a single lead set. */
+    private static PendingIntent pendingSingleLead(Context ctx, long appointmentId) {
+        Intent i = new Intent(ctx, AppointmentReceiver.class)
+                .setData(Uri.parse("atelier://appointment/" + appointmentId));
+        return PendingIntent.getBroadcast(ctx, (int) appointmentId, i,
+                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    /** Sets an alarm for each chosen lead whose trigger time is still ahead, and cancels every other lead. */
     static void schedule(Context ctx, Appointment a, long nowMillis) {
-        int lead = Prefs.visitLeadMinutes(ctx);
-        long trigger = a.startsAt - lead * 60_000L;
-        if (lead <= 0 || trigger <= nowMillis) {
-            cancel(ctx, a.id);
-            return;
+        List<Integer> leads = Prefs.visitLeads(ctx);
+        AlarmManager am = ctx.getSystemService(AlarmManager.class);
+        am.cancel(pendingSingleLead(ctx, a.id));
+        for (int lead : VisitLeads.OPTIONS) {
+            long trigger = a.startsAt - lead * 60_000L;
+            if (leads.contains(lead) && trigger > nowMillis) {
+                am.setWindow(AlarmManager.RTC_WAKEUP, trigger, WINDOW_MILLIS, pending(ctx, a.id, lead));
+                Log.d(TAG, "appointment " + a.id + " alarm " + lead + " min before set for " + trigger);
+            } else {
+                am.cancel(pending(ctx, a.id, lead));
+            }
         }
-        ctx.getSystemService(AlarmManager.class).setWindow(AlarmManager.RTC_WAKEUP, trigger,
-                WINDOW_MILLIS, pending(ctx, a.id));
-        Log.d(TAG, "appointment " + a.id + " alarm set for " + trigger);
     }
 
     static void cancel(Context ctx, long appointmentId) {
-        ctx.getSystemService(AlarmManager.class).cancel(pending(ctx, appointmentId));
-        Log.d(TAG, "appointment " + appointmentId + " alarm cancelled");
+        AlarmManager am = ctx.getSystemService(AlarmManager.class);
+        am.cancel(pendingSingleLead(ctx, appointmentId));
+        for (int lead : VisitLeads.OPTIONS) {
+            am.cancel(pending(ctx, appointmentId, lead));
+        }
+        Log.d(TAG, "appointment " + appointmentId + " alarms cancelled");
     }
 
     /** Sets or cancels the alarm of every future appointment. Reads the database: call it off the main thread. */

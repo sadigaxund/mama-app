@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.atelier.app.backup.BackupPrefs;
 import com.atelier.app.backup.BackupRunner;
 import com.atelier.app.model.ReminderDays;
+import com.atelier.app.model.VisitLeads;
 import com.atelier.app.ui.BackupUi;
 import com.atelier.app.ui.BaseActivity;
 import com.atelier.app.ui.Format;
@@ -26,6 +27,7 @@ import com.atelier.app.ui.NotificationPermission;
 import com.atelier.app.ui.Prefs;
 import com.atelier.app.ui.ReminderDaysEditor;
 
+import java.util.ArrayList;
 import java.util.Currency;
 import java.util.List;
 
@@ -34,9 +36,6 @@ public class SettingsActivity extends BaseActivity {
     private static final String[] LANGUAGE_CODES = {"ru", "az", "en"};
     private static final int[] LANGUAGE_NAMES = {R.string.lang_ru, R.string.lang_az, R.string.lang_en};
     private static final String[] COMMON_CURRENCIES = {"AZN", "RUB", "TRY", "USD", "EUR", "GBP"};
-    private static final int[] VISIT_MINUTES = {0, 15, 30, 60, 120, 24 * 60};
-    private static final int[] VISIT_LABELS = {R.string.visit_off, R.string.visit_15m,
-            R.string.visit_30m, R.string.visit_1h, R.string.visit_2h, R.string.visit_1d};
 
     private Switch morningSwitch;
     private View rowTime;
@@ -161,14 +160,7 @@ public class SettingsActivity extends BaseActivity {
         sub(R.id.row_time).setText(Format.timeOfDay(this, Prefs.morningMinutes(this)));
 
         sub(R.id.row_days).setText(daysText(Prefs.reminderDays(this)));
-        int lead = Prefs.visitLeadMinutes(this);
-        int label = VISIT_LABELS[0];
-        for (int i = 0; i < VISIT_MINUTES.length; i++) {
-            if (VISIT_MINUTES[i] == lead) {
-                label = VISIT_LABELS[i];
-            }
-        }
-        sub(R.id.row_visit).setText(label);
+        sub(R.id.row_visit).setText(visitLeadsText(Prefs.visitLeads(this)));
         refreshBackup();
     }
 
@@ -401,25 +393,61 @@ public class SettingsActivity extends BaseActivity {
         });
     }
 
-    private void chooseVisitLead() {
-        int lead = Prefs.visitLeadMinutes(this);
-        String[] labels = new String[VISIT_MINUTES.length];
-        int checked = -1;
-        for (int i = 0; i < labels.length; i++) {
-            labels[i] = getString(VISIT_LABELS[i]);
-            if (VISIT_MINUTES[i] == lead) {
-                checked = i;
+    /** The label of one lead from VisitLeads.OPTIONS. */
+    private static int visitLabel(int minutes) {
+        switch (minutes) {
+            case 15: return R.string.visit_15m;
+            case 30: return R.string.visit_30m;
+            case 60: return R.string.visit_1h;
+            case 120: return R.string.visit_2h;
+            case 24 * 60: return R.string.visit_1d;
+            default: throw new IllegalArgumentException("no label for lead " + minutes);
+        }
+    }
+
+    /** "За 1 день, за 1 час", or the off label for an empty list. */
+    private String visitLeadsText(List<Integer> leads) {
+        if (leads.isEmpty()) {
+            return getString(R.string.visit_off);
+        }
+        java.util.Locale locale = getResources().getConfiguration().getLocales().get(0);
+        StringBuilder sb = new StringBuilder();
+        for (int lead : leads) {
+            String label = getString(visitLabel(lead));
+            if (sb.length() > 0) {
+                sb.append(", ").append(label.substring(0, 1).toLowerCase(locale)).append(label.substring(1));
+            } else {
+                sb.append(label);
             }
+        }
+        return sb.toString();
+    }
+
+    private void chooseVisitLead() {
+        List<Integer> current = Prefs.visitLeads(this);
+        int[] options = VisitLeads.OPTIONS;
+        String[] labels = new String[options.length];
+        boolean[] checked = new boolean[options.length];
+        for (int i = 0; i < options.length; i++) {
+            labels[i] = getString(visitLabel(options[i]));
+            checked[i] = current.contains(options[i]);
         }
         new AlertDialog.Builder(this)
                 .setTitle(R.string.visit_title)
-                .setSingleChoiceItems(labels, checked, (d, which) -> {
-                    Prefs.get(this).edit().putInt(Prefs.KEY_VISIT_LEAD_MINUTES, VISIT_MINUTES[which]).apply();
-                    // The alarms read the lead from Prefs when set, so every future visit is set again.
+                .setMultiChoiceItems(labels, checked, (d, which, isChecked) -> checked[which] = isChecked)
+                .setPositiveButton(android.R.string.ok, (d, w) -> {
+                    List<Integer> chosen = new ArrayList<>();
+                    for (int i = 0; i < options.length; i++) {
+                        if (checked[i]) {
+                            chosen.add(options[i]);
+                        }
+                    }
+                    // Nothing ticked means visit reminders are off.
+                    Prefs.get(this).edit().putString(Prefs.KEY_VISIT_LEADS, VisitLeads.toCsv(chosen)).apply();
+                    // The alarms read the leads from Prefs when set, so every future visit is set again.
                     new Thread(() -> AppointmentScheduler.rescheduleAll(getApplicationContext()),
                             "reschedule").start();
                     refresh();
-                    d.dismiss();
                 })
                 .setNegativeButton(R.string.action_cancel, null)
                 .show();
