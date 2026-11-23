@@ -35,6 +35,9 @@ command line with the Gradle wrapper. No Android Studio is required.
   package never imports `com.google.*` or `androidx.*` directly.
 - AGP and Gradle move together. Bump one only to a version the AGP release
   notes list as compatible with the other, and bump both in one commit.
+- `targetSdk` 36 removes `windowOptOutEdgeToEdgeEnforcement` from `AppTheme`.
+  Without it, Android 15 and newer draw every screen under the status bar.
+  Raising `targetSdk` to 36 needs window-inset padding on every screen first.
 - Always build with `./gradlew`, never a system `gradle`. The system one is a
   different major version.
 
